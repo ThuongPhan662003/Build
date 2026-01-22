@@ -1,0 +1,14 @@
+### OFFLINE INSTALL: không dùng network mirror (APT chỉ dùng CD/DVD)
+d-i apt-setup/use_mirror boolean false
+
+# Tránh các prompt “scan thêm CD/DVD”
+d-i apt-setup/cdrom/set-first boolean false
+d-i apt-setup/cdrom/set-next boolean false
+d-i apt-setup/cdrom/set-failed boolean false
+
+# Không eject đĩa trước khi reboot (tiện debug)
+d-i cdrom-detect/eject boolean false
+
+### Cài “dịch vụ cơ bản” kiểu server tối thiểu
+tasksel tasksel/first multiselect standard, ssh-server
+#popularity-contest popularity-contest/participate boolean false

@@ -1,0 +1,26 @@
+#!/bin/sh
+set -e
+run_sh() {
+  if command -v in-target >/dev/null 2>&1; then
+    in-target sh -c "$1"
+  else
+    sh -c "$1"
+  fi
+}
+
+run_sh '
+  apt-cdrom -m add || true
+  apt-get update || true
+'
+
+run_sh '
+  systemctl daemon-reload || true
+  systemctl enable php7.2-fpm nginx >/dev/null 2>&1 || true
+
+  systemctl restart php7.2-fpm >/dev/null 2>&1 || true
+  systemctl restart nginx >/dev/null 2>&1 || true
+# systemctl unmask freeswitch.service 2>/dev/null || true
+# systemctl restart freeswitch >/dev/null 2>&1 || true
+'
+
+exit 0
