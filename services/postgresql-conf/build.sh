@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
+#
 # ====== [SỬA 1] Chuẩn hoá service name + repo_root + OUTDIR theo CI ======
 SERVICE="postgresql-conf"   # phải khớp tên thư mục service & workflow matrix.service
 svc_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
