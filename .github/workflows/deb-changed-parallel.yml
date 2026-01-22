@@ -17,6 +17,8 @@ concurrency:
 jobs:
   detect:
     runs-on: ubuntu-latest
+    container:
+      image: debian:bookworm
     outputs:
       services_json: ${{ steps.detect.outputs.services_json }}
       has_services: ${{ steps.detect.outputs.has_services }}
