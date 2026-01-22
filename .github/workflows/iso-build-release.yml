@@ -1,0 +1,80 @@
+name: Build & Release ISO
+
+on:
+  workflow_dispatch:
+    inputs:
+      deb_tag:
+        description: "DEB release tag to use (e.g. deb-v1.2.3)"
+        required: true
+      iso_tag:
+        description: "ISO release tag to create (e.g. iso-v1.2.3)"
+        required: true
+
+  push:
+    tags:
+      - "iso-v*"
+
+concurrency:
+  group: iso-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Decide tags
+        id: tags
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_REF_NAME}" == iso-v* ]]; then
+            echo "iso_tag=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+            echo "deb_tag=deb-v${GITHUB_REF_NAME#iso-v}" >> $GITHUB_OUTPUT
+          else
+            echo "iso_tag=${{ inputs.iso_tag }}" >> $GITHUB_OUTPUT
+            echo "deb_tag=${{ inputs.deb_tag }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download DEBs from GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out/all-debs
+          gh release download "${{ steps.tags.outputs.deb_tag }}" -D out/all-debs -p "*.deb"
+          ls -lah out/all-debs
+
+      - name: Build ISO (container)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -v "$PWD:/work" -w /work \
+            debian:bookworm bash -lc "
+              set -euo pipefail
+              apt-get update
+              apt-get install -y live-build xorriso squashfs-tools grub-pc-bin grub-efi-amd64-bin rsync
+              chmod +x scripts/build_iso.sh
+              chmod +x iso/hooks/010-install-debs.chroot
+              scripts/build_iso.sh --deb-dir out/all-debs --version \"${{ steps.tags.outputs.iso_tag }}\"
+            "
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iso
+          path: out/iso/*.iso
+          if-no-files-found: error
+
+      - name: Create Release + upload ISO
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.tags.outputs.iso_tag }}"
+          gh release create "$TAG" --title "$TAG" --notes "ISO built using ${{ steps.tags.outputs.deb_tag }}" || true
+          gh release upload "$TAG" out/iso/*.iso --clobber
