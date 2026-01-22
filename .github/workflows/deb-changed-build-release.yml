@@ -1,0 +1,167 @@
+name: Build & Release DEB (only changed services)
+
+on:
+  push:
+    branches: ["main"]
+    tags:
+      - "deb-v*"
+    paths:
+      - "services/**"
+      - ".github/workflows/deb-changed-build-release.yml"
+
+permissions:
+  contents: write  # cần để tạo release + upload asset bằng GITHUB_TOKEN
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      services_json: ${{ steps.detect.outputs.services_json }}
+      has_services: ${{ steps.detect.outputs.has_services }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Chọn BASE để diff:
+          if [[ "${GITHUB_REF}" == refs/tags/deb-v* ]]; then
+            PREV_TAG="$(git describe --tags --abbrev=0 "${GITHUB_SHA}^" 2>/dev/null || true)"
+            if [[ -n "${PREV_TAG}" ]]; then
+              BASE="$(git rev-list -n 1 "${PREV_TAG}")"
+            else
+              BASE="${GITHUB_SHA}^"
+            fi
+          else
+            BASE="${{ github.event.before }}"
+          fi
+
+          CHANGED="$(git diff --name-only "$BASE" "${GITHUB_SHA}" || true)"
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          # Lấy danh sách service theo: services/<service>/...
+          SERVICES="$(
+            echo "$CHANGED" \
+              | awk -F/ '$1=="services" && $2!="" {print $2}' \
+              | sort -u
+          )"
+
+          if [[ -z "$SERVICES" ]]; then
+            echo "has_services=false" >> "$GITHUB_OUTPUT"
+            echo 'services_json=[]' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # list -> JSON array
+          JSON='['
+          first=1
+          while IFS= read -r s; do
+            [[ -z "$s" ]] && continue
+            if [[ $first -eq 1 ]]; then first=0; else JSON+=','; fi
+            JSON+="\"$s\""
+          done <<< "$SERVICES"
+          JSON+=']'
+
+          echo "has_services=true" >> "$GITHUB_OUTPUT"
+          echo "services_json=$JSON" >> "$GITHUB_OUTPUT"
+          echo "Detected services: $JSON"
+
+  build:
+    needs: detect
+    if: needs.detect.outputs.has_services == 'true'
+    runs-on: ubuntu-latest
+
+    # Chạy trong Debian
+    container:
+      image: debian:bookworm
+
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.detect.outputs.services_json) }}
+
+    steps:
+      # NOTE: checkout trong container cần git => cài git trước
+      - name: Install git + build deps
+        shell: bash
+        run: |
+          set -euo pipefail
+          apt-get update
+          apt-get install -y git ca-certificates dpkg-dev findutils coreutils
+
+      - uses: actions/checkout@v4
+
+      - name: Build DEB for ${{ matrix.service }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          svc="${{ matrix.service }}"
+          mkdir -p "out/deb/$svc"
+
+          # Lưu danh sách .deb trước khi build
+          find . -maxdepth 4 -type f -name "*.deb" | sort > /tmp/deb_before.txt || true
+
+          chmod +x "services/$svc/build.sh"
+
+          # Chạy build.sh (theo đúng cách bạn đang làm)
+          # build.sh có thể gọi dpkg-deb --build services/<svc> ...
+          bash "services/$svc/build.sh"
+
+          # Lấy các .deb mới sinh ra sau build
+          find . -maxdepth 4 -type f -name "*.deb" | sort > /tmp/deb_after.txt || true
+          NEW_DEBS="$(comm -13 /tmp/deb_before.txt /tmp/deb_after.txt || true)"
+
+          if [[ -z "$NEW_DEBS" ]]; then
+            echo "[ERROR] No new .deb produced for service: $svc"
+            echo "Debug: list deb files:"
+            find . -maxdepth 4 -type f -name "*.deb" -print || true
+            exit 1
+          fi
+
+          echo "New deb(s):"
+          echo "$NEW_DEBS"
+
+          # Move debs vào đúng chuẩn out/deb/<service>/
+          while IFS= read -r f; do
+            [[ -z "$f" ]] && continue
+            mv -f "$f" "out/deb/$svc/"
+          done <<< "$NEW_DEBS"
+
+          echo "Output:"
+          ls -lah "out/deb/$svc"
+
+      - name: Upload artifact (per service)
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-${{ matrix.service }}
+          path: out/deb/${{ matrix.service }}/*.deb
+          if-no-files-found: error
+
+  release:
+    needs: [detect, build]
+    if: startsWith(github.ref, 'refs/tags/deb-v') && needs.detect.outputs.has_services == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all deb artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: out/all-debs
+
+      - name: Show debs
+        run: |
+          find out/all-debs -name "*.deb" -print
+
+      - name: Create Release + upload DEBs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          gh release create "$TAG" --title "$TAG" --notes "DEB release for $TAG" || true
+          gh release upload "$TAG" out/all-debs/**/**/*.deb --clobber
