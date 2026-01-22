@@ -10,7 +10,7 @@ on:
       - ".github/workflows/deb-changed-build-release.yml"
 
 permissions:
-  contents: write  # cần để tạo release + upload asset bằng GITHUB_TOKEN
+  contents: write
 
 jobs:
   detect:
@@ -28,7 +28,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Chọn BASE để diff:
+          # Chọn BASE để diff
           if [[ "${GITHUB_REF}" == refs/tags/deb-v* ]]; then
             PREV_TAG="$(git describe --tags --abbrev=0 "${GITHUB_SHA}^" 2>/dev/null || true)"
             if [[ -n "${PREV_TAG}" ]]; then
@@ -44,7 +44,6 @@ jobs:
           echo "Changed files:"
           echo "$CHANGED"
 
-          # Lấy danh sách service theo: services/<service>/...
           SERVICES="$(
             echo "$CHANGED" \
               | awk -F/ '$1=="services" && $2!="" {print $2}' \
@@ -57,7 +56,6 @@ jobs:
             exit 0
           fi
 
-          # list -> JSON array
           JSON='['
           first=1
           while IFS= read -r s; do
@@ -76,7 +74,6 @@ jobs:
     if: needs.detect.outputs.has_services == 'true'
     runs-on: ubuntu-latest
 
-    # Chạy trong Debian
     container:
       image: debian:bookworm
 
@@ -86,7 +83,6 @@ jobs:
         service: ${{ fromJSON(needs.detect.outputs.services_json) }}
 
     steps:
-      # NOTE: checkout trong container cần git => cài git trước
       - name: Install git + build deps
         shell: bash
         run: |
@@ -103,30 +99,26 @@ jobs:
           svc="${{ matrix.service }}"
           mkdir -p "out/deb/$svc"
 
-          # Lưu danh sách .deb trước khi build
-          find . -maxdepth 4 -type f -name "*.deb" | sort > /tmp/deb_before.txt || true
+          # snapshot trước
+          find . -maxdepth 6 -type f -name "*.deb" | sort > /tmp/deb_before.txt || true
 
           chmod +x "services/$svc/build.sh"
-
-          # Chạy build.sh (theo đúng cách bạn đang làm)
-          # build.sh có thể gọi dpkg-deb --build services/<svc> ...
           bash "services/$svc/build.sh"
 
-          # Lấy các .deb mới sinh ra sau build
-          find . -maxdepth 4 -type f -name "*.deb" | sort > /tmp/deb_after.txt || true
+          # snapshot sau
+          find . -maxdepth 6 -type f -name "*.deb" | sort > /tmp/deb_after.txt || true
           NEW_DEBS="$(comm -13 /tmp/deb_before.txt /tmp/deb_after.txt || true)"
 
           if [[ -z "$NEW_DEBS" ]]; then
             echo "[ERROR] No new .deb produced for service: $svc"
-            echo "Debug: list deb files:"
-            find . -maxdepth 4 -type f -name "*.deb" -print || true
+            find . -maxdepth 6 -type f -name "*.deb" -print || true
             exit 1
           fi
 
           echo "New deb(s):"
           echo "$NEW_DEBS"
 
-          # Move debs vào đúng chuẩn out/deb/<service>/
+          # move về out/deb/<service>/
           while IFS= read -r f; do
             [[ -z "$f" ]] && continue
             mv -f "$f" "out/deb/$svc/"
@@ -142,44 +134,42 @@ jobs:
           path: out/deb/${{ matrix.service }}/*.deb
           if-no-files-found: error
 
-release:
-  needs: [detect, build]
-  if: startsWith(github.ref, 'refs/tags/deb-v') && needs.detect.outputs.has_services == 'true'
-  runs-on: ubuntu-latest
-  permissions:
-    contents: write
+  release:
+    needs: [detect, build]
+    if: startsWith(github.ref, 'refs/tags/deb-v') && needs.detect.outputs.has_services == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
-  steps:
-    - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-    - name: Download all deb artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: out/all-debs
+      - name: Download all deb artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: out/all-debs
 
-    - name: Show debs
-      shell: bash
-      run: |
-        set -euo pipefail
-        find out/all-debs -type f -name "*.deb" -print
+      - name: Show debs
+        shell: bash
+        run: |
+          set -euo pipefail
+          find out/all-debs -type f -name "*.deb" -print
 
-    - name: Create Release + upload DEBs
-      shell: bash
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GH_REPO: ${{ github.repository }}
-      run: |
-        set -euo pipefail
-        TAG="${GITHUB_REF_NAME}"
+      - name: Create Release + upload DEBs
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
 
-        # tạo release (nếu có rồi thì bỏ qua)
-        gh release create "$TAG" --title "$TAG" --notes "DEB release for $TAG" --repo "$GH_REPO" || true
+          gh release create "$TAG" --title "$TAG" --notes "DEB release for $TAG" --repo "$GH_REPO" || true
 
-        # lấy danh sách deb (không dùng **)
-        mapfile -t DEBS < <(find out/all-debs -type f -name "*.deb")
-        if [[ ${#DEBS[@]} -eq 0 ]]; then
-          echo "[ERROR] No .deb found under out/all-debs"
-          exit 1
-        fi
+          mapfile -t DEBS < <(find out/all-debs -type f -name "*.deb")
+          if [[ ${#DEBS[@]} -eq 0 ]]; then
+            echo "[ERROR] No .deb found under out/all-debs"
+            exit 1
+          fi
 
-        gh release upload "$TAG" "${DEBS[@]}" --clobber --repo "$GH_REPO"
+          gh release upload "$TAG" "${DEBS[@]}" --clobber --repo "$GH_REPO"
