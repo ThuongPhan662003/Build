@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+
+mkdir -p /var/log/php7.2
+chown www-data:www-data /var/log/php7.2 || true
+
+systemctl enable php7.2-fpm >/dev/null 2>&1 || true
+systemctl restart php7.2-fpm

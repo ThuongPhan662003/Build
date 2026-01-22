@@ -1,0 +1,8 @@
+Package: tel4vn-php72-config
+Version: 1.0-1
+Section: web
+Priority: optional
+Architecture: amd64
+Depends: php7.2-fpm 
+Maintainer: tel4vn <devnull@local>
+Description: PHP 7.2 FPM config for FusionPBX (config-only package)
