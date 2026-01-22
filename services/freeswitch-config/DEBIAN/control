@@ -1,0 +1,8 @@
+Package: tel4vn-freeswitch-config
+Version: 1.0-1
+Section: admin
+Priority: optional
+Architecture: amd64
+Maintainer: Tel4VN <admin@local>
+Depends: tel4vn-freeswitch-local
+Description: FreeSWITCH configuration (conf + scripts) packaged from a running VM
