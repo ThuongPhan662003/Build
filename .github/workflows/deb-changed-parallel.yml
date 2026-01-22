@@ -30,7 +30,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          ALL_SERVICES='["freeswitch","fusionpbx","postgresql","php","nginx"]'
+          ALL_SERVICES='["freeswitch","freeswitch-conf","fusionpbx","postgresql","postgresql-conf","php","php-conf","nginx","nginx-conf","nginx-ssl"]'
 
           # Base để diff
           if [[ "${GITHUB_REF}" == refs/tags/deb-v* ]]; then
