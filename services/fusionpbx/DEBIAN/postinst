@@ -1,0 +1,4 @@
+#!/bin/sh
+set -e
+chown -R www-data:www-data /var/www/fusionpbx
+chmod -R 755 /var/www/fusionpbx/secure || true

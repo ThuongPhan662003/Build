@@ -1,0 +1,8 @@
+Package: tel4vn-nginx-ssl
+Version: 1.0-1
+Section: web
+Priority: optional
+Architecture: all
+Maintainer: Tel4VN <support@example.com>
+Depends: bash, coreutils, ssl-cert
+Description: Provide /etc/ssl/certs/nginx.crt and /etc/ssl/private/nginx.key using snakeoil cert

@@ -1,0 +1,4 @@
+#!/bin/sh
+set -e
+/usr/local/sbin/tel4vn-setup-nginx-ssl || true
+exit 0

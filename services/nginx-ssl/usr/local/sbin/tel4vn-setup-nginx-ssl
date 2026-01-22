@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+LOG="/var/log/tel4vn-nginx-ssl.log"
+
+NGINX_CRT="/etc/ssl/certs/nginx.crt"
+NGINX_KEY="/etc/ssl/private/nginx.key"
+
+SNAKE_CRT="/etc/ssl/certs/ssl-cert-snakeoil.pem"
+SNAKE_KEY="/etc/ssl/private/ssl-cert-snakeoil.key"
+
+backup_if_real_file() {
+  local p="$1"
+  if [[ -e "$p" && ! -L "$p" ]]; then
+    mv -f "$p" "${p}.bak.$(date +%Y%m%d%H%M%S)" || true
+  fi
+}
+
+main() {
+  touch "$LOG" 2>/dev/null || true
+
+  {
+    echo "[INFO] tel4vn nginx ssl setup start"
+
+    if [[ ! -f "$SNAKE_CRT" || ! -f "$SNAKE_KEY" ]]; then
+      echo "[WARN] snakeoil cert/key not found:"
+      echo "       $SNAKE_CRT"
+      echo "       $SNAKE_KEY"
+      echo "       (ssl-cert may not be installed yet)."
+      exit 0
+    fi
+
+    backup_if_real_file "$NGINX_CRT"
+    backup_if_real_file "$NGINX_KEY"
+
+    ln -sf "$SNAKE_KEY" "$NGINX_KEY"
+    ln -sf "$SNAKE_CRT" "$NGINX_CRT"
+
+    # permissions: keep default; nginx master (root) can read key on startup
+    chmod 644 "$NGINX_CRT" 2>/dev/null || true
+
+    echo "[INFO] Linked:"
+    echo "       $NGINX_KEY -> $SNAKE_KEY"
+    echo "       $NGINX_CRT -> $SNAKE_CRT"
+    echo "[INFO] done"
+  } >>"$LOG" 2>&1 || true
+
+  exit 0
+}
+
+main "$@"

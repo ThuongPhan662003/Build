@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+
+LOG="/var/log/tel4vn-fusionpbx-dbimport.log"
+touch "$LOG" 2>/dev/null || true
+
+/usr/local/sbin/tel4vn-fusionpbx-dbimport --write-config >>"$LOG" 2>&1 || true
+/usr/local/sbin/tel4vn-fusionpbx-dbimport --import >>"$LOG" 2>&1 || true
+
+exit 0

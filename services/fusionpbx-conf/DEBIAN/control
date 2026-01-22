@@ -1,0 +1,8 @@
+Package: tel4vn-fusionpbx-dbimport
+Version: 1.0-1
+Section: admin
+Priority: optional
+Architecture: all
+Maintainer: Tel4VN <support@example.com>
+Depends: bash, sed, coreutils, php-cli | php7.2-cli | php8.2-cli, php-pgsql | php7.2-pgsql | php8.2-pgsql, postgresql-client | postgresql-client-12 | postgresql-client-15
+Description: Tel4VN FusionPBX DB import + write /etc/fusionpbx/config.php

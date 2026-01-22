@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+LOG="/var/log/tel4vn-postgresql12-config.log"
+ENV_FILE="/etc/tel4vn/postgresql12.env"
+
+touch "$LOG" 2>/dev/null || true
+
+{
+  echo "[INFO] tel4vn postgresql setup start: $(date -Is)"
+
+  if [[ -f "$ENV_FILE" ]]; then
+    # shellcheck disable=SC1090
+    source "$ENV_FILE"
+  else
+    echo "[WARN] Missing $ENV_FILE, using hardcoded defaults"
+    PGVER="12"; CLUSTER="main"
+    DB_FUSIONPBX="fusionpbx"; DB_FREESWITCH="freeswitch"
+    ROLE_FUSIONPBX="fusionpbx"; ROLE_FREESWITCH="freeswitch"
+    ROLE_PASSWORD="Tel4vn.com##2023"
+    ROLE_FUSIONPBX_PASSWORD=""; ROLE_FREESWITCH_PASSWORD=""
+  fi
+
+  CONF_DIR="/etc/postgresql/${PGVER}/${CLUSTER}"
+  CONF_D_DIR="${CONF_DIR}/conf.d"
+  PG_HBA="${CONF_DIR}/pg_hba.conf"
+  TEL4VN_DROPIN="${CONF_D_DIR}/zzz-tel4vn.conf"
+
+  # --- Ensure pgdg repo exists (best-effort, do not fail ISO) ---
+  if [[ ! -f /etc/apt/sources.list.d/postgresql.list ]]; then
+    codename="$(lsb_release -sc 2>/dev/null || true)"
+    if [[ -n "$codename" ]]; then
+      echo "deb http://apt.postgresql.org/pub/repos/apt/ ${codename}-pgdg main" > /etc/apt/sources.list.d/postgresql.list || true
+      wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - >/dev/null 2>&1 || true
+      apt-get update >/dev/null 2>&1 || true
+    fi
+  fi
+
+  # --- Make sure service exists/runs ---
+  systemctl daemon-reload >/dev/null 2>&1 || true
+  systemctl enable postgresql >/dev/null 2>&1 || true
+  systemctl restart postgresql >/dev/null 2>&1 || systemctl start postgresql >/dev/null 2>&1 || true
+
+  # --- max_connections = 500 via drop-in ---
+  mkdir -p "$CONF_D_DIR" || true
+  cat > "$TEL4VN_DROPIN" <<'DROPIN'
+# Tel4VN tuning
+max_connections = 500
+DROPIN
+
+  # --- pg_hba: ensure localhost password auth (md5) for 127.0.0.1 and ::1 ---
+  if [[ -f "$PG_HBA" ]]; then
+    # Add only if not present already
+    grep -qE '^[[:space:]]*host[[:space:]]+all[[:space:]]+all[[:space:]]+127\.0\.0\.1/32[[:space:]]+md5' "$PG_HBA" || \
+      echo "host    all             all             127.0.0.1/32            md5" >> "$PG_HBA"
+    grep -qE '^[[:space:]]*host[[:space:]]+all[[:space:]]+all[[:space:]]+::1/128[[:space:]]+md5' "$PG_HBA" || \
+      echo "host    all             all             ::1/128                 md5" >> "$PG_HBA"
+  else
+    echo "[WARN] $PG_HBA not found; skipping pg_hba patch"
+  fi
+
+  # Reload/restart cluster
+  if command -v pg_ctlcluster >/dev/null 2>&1; then
+    pg_ctlcluster "$PGVER" "$CLUSTER" reload >/dev/null 2>&1 || pg_ctlcluster "$PGVER" "$CLUSTER" restart >/dev/null 2>&1 || true
+  else
+    systemctl restart postgresql >/dev/null 2>&1 || true
+  fi
+# wait for postgres to accept connections (up to 30s)
+for i in $(seq 1 30); do
+  if sudo -u postgres psql -h 127.0.0.1 -p 5432 -tAc "SELECT 1" >/dev/null 2>&1; then
+    break
+  fi
+  sleep 1
+done
+  # --- Create db/roles/grants (idempotent) ---
+  role_pw_f="${ROLE_FUSIONPBX_PASSWORD:-}"
+  role_pw_s="${ROLE_FREESWITCH_PASSWORD:-}"
+  [[ -n "$role_pw_f" ]] || role_pw_f="${ROLE_PASSWORD:-Tel4vn.com##2023}"
+  [[ -n "$role_pw_s" ]] || role_pw_s="${ROLE_PASSWORD:-Tel4vn.com##2023}"
+
+  db_exists() { sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='${1}'" | grep -q 1; }
+  role_exists() { sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='${1}'" | grep -q 1; }
+
+  if ! db_exists "$DB_FUSIONPBX"; then
+    sudo -u postgres psql -c "CREATE DATABASE ${DB_FUSIONPBX};" || true
+  fi
+  if ! db_exists "$DB_FREESWITCH"; then
+    sudo -u postgres psql -c "CREATE DATABASE ${DB_FREESWITCH};" || true
+  fi
+
+  if ! role_exists "$ROLE_FUSIONPBX"; then
+    sudo -u postgres psql -c "CREATE ROLE ${ROLE_FUSIONPBX} WITH SUPERUSER LOGIN PASSWORD '${role_pw_f}';" || true
+  fi
+  if ! role_exists "$ROLE_FREESWITCH"; then
+    sudo -u postgres psql -c "CREATE ROLE ${ROLE_FREESWITCH} WITH SUPERUSER LOGIN PASSWORD '${role_pw_s}';" || true
+  fi
+
+  sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${DB_FUSIONPBX} to ${ROLE_FUSIONPBX};" || true
+  sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${DB_FREESWITCH} to ${ROLE_FUSIONPBX};" || true
+  sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${DB_FREESWITCH} to ${ROLE_FREESWITCH};" || true
+
+  echo "[INFO] done"
+  echo "[INFO] drop-in: ${TEL4VN_DROPIN}"
+  echo "[INFO] pg_hba:  ${PG_HBA}"
+} >>"$LOG" 2>&1 || true
+
+exit 0

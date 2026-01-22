@@ -1,0 +1,4 @@
+#!/bin/sh
+set -e
+/usr/local/sbin/tel4vn-setup-postgresql12 || true
+exit 0

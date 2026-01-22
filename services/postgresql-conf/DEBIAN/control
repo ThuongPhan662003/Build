@@ -1,0 +1,8 @@
+Package: tel4vn-postgresql12-config
+Version: 1.0-1
+Section: database
+Priority: optional
+Architecture: amd64
+Maintainer: Tel4VN <support@example.com>
+Depends: bash, coreutils, ca-certificates, gnupg, wget, lsb-release, apt-transport-https, sudo, postgresql-12, postgresql-client-12
+Description: Configure PostgreSQL 12 for FusionPBX/FreeSWITCH (db/role/grant, pg_hba localhost md5, max_connections=500)
