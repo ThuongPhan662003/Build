@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+# set owner/perms giống best practice khi chạy FS bằng www-data
+chown -R www-data:www-data /usr/local/freeswitch 2>/dev/null || true
+find /usr/local/freeswitch -type d -exec chmod 2770 {} \; 2>/dev/null || true
+mkdir -p /var/log/freeswitch || true
+chown -R www-data:www-data /var/log/freeswitch 2>/dev/null || true
+
+systemctl daemon-reload || true
+systemctl restart freeswitch.service >/dev/null 2>&1 || true
+exit 0

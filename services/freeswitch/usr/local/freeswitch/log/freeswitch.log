@@ -1,0 +1,1139 @@
+2026-01-13 17:37:52.703797 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:37:52.703822 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:37:52.703924 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'console'
+2026-01-13 17:37:52.704959 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:37:52.704979 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:37:52.705057 0.00% [ERR] mod_callcenter.c:1512 Open of callcenter.conf failed
+2026-01-13 17:37:52.705069 0.00% [DEBUG] switch_event.c:2196 Event Binding deleted for mod_callcenter:PRESENCE_PROBE
+2026-01-13 17:37:52.705072 0.00% [NOTICE] switch_event.c:467 Subclass reservation deleted for mod_callcenter.c:callcenter::info
+2026-01-13 17:37:52.705134 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_callcenter.so
+**Module load routine returned an error**
+2026-01-13 17:37:52.706184 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:37:52.706202 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:37:52.708375 0.00% [INFO] switch_core_sqldb.c:1840 fifo Starting SQL thread.
+2026-01-13 17:37:52.709544 0.00% [DEBUG] switch_core_sqldb.c:1494 SQL ERR [no such table: fifo_outbound]
+[delete from fifo_outbound where static = 1 or taking_calls < 0 or stop_time < 0]
+Auto Generating Table!
+2026-01-13 17:37:52.709593 0.00% [DEBUG] switch_core_sqldb.c:1501 Ignoring SQL ERR [no such table: fifo_outbound]
+[drop table fifo_outbound]
+2026-01-13 17:37:52.709973 0.00% [DEBUG] switch_core_sqldb.c:1494 SQL ERR [no such table: fifo_bridge]
+[delete from fifo_bridge]
+Auto Generating Table!
+2026-01-13 17:37:52.710022 0.00% [DEBUG] switch_core_sqldb.c:1501 Ignoring SQL ERR [no such table: fifo_bridge]
+[drop table fifo_bridge]
+2026-01-13 17:37:52.710371 0.00% [DEBUG] switch_core_sqldb.c:1494 SQL ERR [no such table: fifo_callers]
+[delete from fifo_callers]
+Auto Generating Table!
+2026-01-13 17:37:52.710418 0.00% [DEBUG] switch_core_sqldb.c:1501 Ignoring SQL ERR [no such table: fifo_callers]
+[drop table fifo_callers]
+2026-01-13 17:37:52.711224 0.00% [INFO] mod_fifo.c:4647 cool_fifo@ configured
+2026-01-13 17:37:52.711376 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'fifo'
+2026-01-13 17:37:52.711391 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'fifo_track_call'
+2026-01-13 17:37:52.711400 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'fifo'
+2026-01-13 17:37:52.711408 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'fifo_member'
+2026-01-13 17:37:52.711415 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'fifo_add_outbound'
+2026-01-13 17:37:52.711422 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'fifo_check_bridge'
+2026-01-13 17:37:52.711491 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_sms.so
+**/usr/local/freeswitch/mod/mod_sms.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.711902 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'play_fsv'
+2026-01-13 17:37:52.711922 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'record_fsv'
+2026-01-13 17:37:52.711933 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'play_yuv'
+2026-01-13 17:37:52.711944 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'decode_video'
+2026-01-13 17:37:52.711958 0.00% [NOTICE] switch_loadable_module.c:455 Adding File Format 'fsv'
+2026-01-13 17:37:52.712350 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'esf_page_group'
+2026-01-13 17:37:52.712767 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'expr'
+2026-01-13 17:37:52.713353 0.00% [NOTICE] switch_loadable_module.c:172 Adding Endpoint 'error'
+2026-01-13 17:37:52.713376 0.00% [NOTICE] switch_loadable_module.c:172 Adding Endpoint 'group'
+2026-01-13 17:37:52.713386 0.00% [NOTICE] switch_loadable_module.c:172 Adding Endpoint 'user'
+2026-01-13 17:37:52.713401 0.00% [NOTICE] switch_loadable_module.c:172 Adding Endpoint 'pickup'
+2026-01-13 17:37:52.713410 0.00% [NOTICE] switch_loadable_module.c:273 Adding Dialplan 'inline'
+2026-01-13 17:37:52.713426 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'blind_transfer_ack'
+2026-01-13 17:37:52.713443 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'bind_digit_action'
+2026-01-13 17:37:52.713454 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'capture'
+2026-01-13 17:37:52.713475 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'clear_digit_action'
+2026-01-13 17:37:52.713488 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'digit_action_set_realm'
+2026-01-13 17:37:52.713499 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'privacy'
+2026-01-13 17:37:52.713516 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set_audio_level'
+2026-01-13 17:37:52.713534 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set_mute'
+2026-01-13 17:37:52.713550 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'flush_dtmf'
+2026-01-13 17:37:52.713563 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'hold'
+2026-01-13 17:37:52.713580 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'unhold'
+2026-01-13 17:37:52.713592 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'mutex'
+2026-01-13 17:37:52.713606 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'page'
+2026-01-13 17:37:52.713620 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'transfer'
+2026-01-13 17:37:52.713629 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'check_acl'
+2026-01-13 17:37:52.713643 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'verbose_events'
+2026-01-13 17:37:52.713655 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'novideo'
+2026-01-13 17:37:52.713673 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'cng_plc'
+2026-01-13 17:37:52.713690 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'early_hangup'
+2026-01-13 17:37:52.713702 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'sleep'
+2026-01-13 17:37:52.713716 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'delay_echo'
+2026-01-13 17:37:52.713731 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'strftime'
+2026-01-13 17:37:52.713749 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'phrase'
+2026-01-13 17:37:52.713764 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'eval'
+2026-01-13 17:37:52.713782 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set_media_stats'
+2026-01-13 17:37:52.713806 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'stop'
+2026-01-13 17:37:52.713818 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set_zombie_exec'
+2026-01-13 17:37:52.713832 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'pre_answer'
+2026-01-13 17:37:52.713846 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'answer'
+2026-01-13 17:37:52.713865 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'wait_for_answer'
+2026-01-13 17:37:52.713877 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'wait_for_video_ready'
+2026-01-13 17:37:52.713896 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'hangup'
+2026-01-13 17:37:52.713912 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set_name'
+2026-01-13 17:37:52.713928 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'presence'
+2026-01-13 17:37:52.713944 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'log'
+2026-01-13 17:37:52.713961 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'info'
+2026-01-13 17:37:52.713984 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'event'
+2026-01-13 17:37:52.714007 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'sound_test'
+2026-01-13 17:37:52.714020 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'export'
+2026-01-13 17:37:52.714037 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'bridge_export'
+2026-01-13 17:37:52.714050 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set'
+2026-01-13 17:37:52.714062 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'multiset'
+2026-01-13 17:37:52.714077 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'push'
+2026-01-13 17:37:52.714099 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'unshift'
+2026-01-13 17:37:52.714115 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set_global'
+2026-01-13 17:37:52.714134 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set_profile_var'
+2026-01-13 17:37:52.714159 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'unset'
+2026-01-13 17:37:52.714173 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'multiunset'
+2026-01-13 17:37:52.714184 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'capture_text'
+2026-01-13 17:37:52.714197 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'acknowledge_call'
+2026-01-13 17:37:52.714210 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'ring_ready'
+2026-01-13 17:37:52.714226 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'remove_bugs'
+2026-01-13 17:37:52.714245 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'break'
+2026-01-13 17:37:52.714255 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'detect_speech'
+2026-01-13 17:37:52.714273 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'play_and_detect_speech'
+2026-01-13 17:37:52.714287 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'ivr'
+2026-01-13 17:37:52.714303 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'redirect'
+2026-01-13 17:37:52.714322 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'video_refresh'
+2026-01-13 17:37:52.714343 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'video_decode'
+2026-01-13 17:37:52.714353 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'send_info'
+2026-01-13 17:37:52.714367 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'jitterbuffer'
+2026-01-13 17:37:52.714392 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'send_display'
+2026-01-13 17:37:52.714407 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'respond'
+2026-01-13 17:37:52.714427 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'deflect'
+2026-01-13 17:37:52.714447 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'recovery_refresh'
+2026-01-13 17:37:52.714459 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'reuse_caller_profile'
+2026-01-13 17:37:52.714474 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'queue_dtmf'
+2026-01-13 17:37:52.714489 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'send_dtmf'
+2026-01-13 17:37:52.714507 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'sched_cancel'
+2026-01-13 17:37:52.714517 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'sched_hangup'
+2026-01-13 17:37:52.714540 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'sched_broadcast'
+2026-01-13 17:37:52.714552 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'sched_transfer'
+2026-01-13 17:37:52.714563 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'execute_extension'
+2026-01-13 17:37:52.714578 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'sched_heartbeat'
+2026-01-13 17:37:52.714593 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'enable_heartbeat'
+2026-01-13 17:37:52.714606 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'filter_codecs'
+2026-01-13 17:37:52.714623 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'enable_keepalive'
+2026-01-13 17:37:52.714635 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'media_reset'
+2026-01-13 17:37:52.714662 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'mkdir'
+2026-01-13 17:37:52.714676 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'rename'
+2026-01-13 17:37:52.714687 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'transfer_vars'
+2026-01-13 17:37:52.714705 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'soft_hold'
+2026-01-13 17:37:52.714717 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'bind_meta_app'
+2026-01-13 17:37:52.714734 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'unbind_meta_app'
+2026-01-13 17:37:52.714772 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'block_dtmf'
+2026-01-13 17:37:52.714787 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'unblock_dtmf'
+2026-01-13 17:37:52.714795 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'intercept'
+2026-01-13 17:37:52.714804 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'eavesdrop'
+2026-01-13 17:37:52.714820 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'native_eavesdrop'
+2026-01-13 17:37:52.714833 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'three_way'
+2026-01-13 17:37:52.714845 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set_user'
+2026-01-13 17:37:52.714860 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'stop_dtmf'
+2026-01-13 17:37:52.714872 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'start_dtmf'
+2026-01-13 17:37:52.714893 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'stop_dtmf_generate'
+2026-01-13 17:37:52.714906 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'start_dtmf_generate'
+2026-01-13 17:37:52.714921 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'stop_tone_detect'
+2026-01-13 17:37:52.714937 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'fax_detect'
+2026-01-13 17:37:52.714949 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'tone_detect'
+2026-01-13 17:37:52.714963 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'echo'
+2026-01-13 17:37:52.714974 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'park'
+2026-01-13 17:37:52.714996 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'park_state'
+2026-01-13 17:37:52.715013 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'gentones'
+2026-01-13 17:37:52.715031 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'playback'
+2026-01-13 17:37:52.715044 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'broadcast'
+2026-01-13 17:37:52.715063 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'endless_playback'
+2026-01-13 17:37:52.715073 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'loop_playback'
+2026-01-13 17:37:52.715086 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'att_xfer'
+2026-01-13 17:37:52.715097 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'read'
+2026-01-13 17:37:52.715112 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'play_and_get_digits'
+2026-01-13 17:37:52.715128 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'stop_video_write_overlay'
+2026-01-13 17:37:52.715142 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'video_write_overlay'
+2026-01-13 17:37:52.715158 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'stop_record_session'
+2026-01-13 17:37:52.715172 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'record_session'
+2026-01-13 17:37:52.715185 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'record_session_mask'
+2026-01-13 17:37:52.715200 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'record_session_unmask'
+2026-01-13 17:37:52.715212 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'record_session_pause'
+2026-01-13 17:37:52.715231 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'record_session_resume'
+2026-01-13 17:37:52.715268 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'record'
+2026-01-13 17:37:52.715286 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'preprocess'
+2026-01-13 17:37:52.715296 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'stop_displace_session'
+2026-01-13 17:37:52.715308 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'displace_session'
+2026-01-13 17:37:52.715322 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'speak'
+2026-01-13 17:37:52.715343 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'clear_speech_cache'
+2026-01-13 17:37:52.715363 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'bridge'
+2026-01-13 17:37:52.715376 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'system'
+2026-01-13 17:37:52.715392 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'bgsystem'
+2026-01-13 17:37:52.715406 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'say'
+2026-01-13 17:37:52.715417 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'detect_audio'
+2026-01-13 17:37:52.715430 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'detect_silence'
+2026-01-13 17:37:52.715443 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'wait_for_silence'
+2026-01-13 17:37:52.715460 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'session_loglevel'
+2026-01-13 17:37:52.715479 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'limit'
+2026-01-13 17:37:52.715495 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'limit_hash'
+2026-01-13 17:37:52.715513 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'limit_execute'
+2026-01-13 17:37:52.715530 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'limit_hash_execute'
+2026-01-13 17:37:52.715553 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'pickup'
+2026-01-13 17:37:52.715564 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'deduplicate_dtmf'
+2026-01-13 17:37:52.715576 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'vad_test'
+2026-01-13 17:37:52.715594 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'debug_media'
+2026-01-13 17:37:52.715613 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'strepoch'
+2026-01-13 17:37:52.715622 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'page'
+2026-01-13 17:37:52.715640 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'strmicroepoch'
+2026-01-13 17:37:52.715659 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'chat'
+2026-01-13 17:37:52.715675 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'strftime'
+2026-01-13 17:37:52.715690 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'presence'
+2026-01-13 17:37:52.715702 0.00% [NOTICE] switch_loadable_module.c:455 Adding File Format 'file_string'
+2026-01-13 17:37:52.715717 0.00% [NOTICE] switch_loadable_module.c:455 Adding File Format 'file'
+2026-01-13 17:37:52.715731 0.00% [NOTICE] switch_loadable_module.c:621 Adding Chat interface 'event'
+2026-01-13 17:37:52.715754 0.00% [NOTICE] switch_loadable_module.c:621 Adding Chat interface 'api'
+2026-01-13 17:37:52.717984 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:37:52.718005 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:37:52.718089 0.00% [NOTICE] switch_loadable_module.c:273 Adding Dialplan 'enum'
+2026-01-13 17:37:52.718114 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'enum'
+2026-01-13 17:37:52.718126 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'enum'
+2026-01-13 17:37:52.718137 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'enum_auto'
+2026-01-13 17:37:52.718211 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_valet_parking.so
+**/usr/local/freeswitch/mod/mod_valet_parking.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.718274 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_spandsp.so
+**/usr/local/freeswitch/mod/mod_spandsp.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.719283 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:37:52.719303 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:37:52.720183 0.00% [DEBUG] switch_core_sqldb.c:1494 SQL ERR [no such table: limit_data]
+[select * from limit_data]
+Auto Generating Table!
+2026-01-13 17:37:52.720713 0.00% [DEBUG] switch_core_sqldb.c:1494 SQL ERR [no such table: db_data]
+[select * from db_data]
+Auto Generating Table!
+2026-01-13 17:37:52.721205 0.00% [DEBUG] switch_core_sqldb.c:1494 SQL ERR [no such table: group_data]
+[select * from group_data]
+Auto Generating Table!
+2026-01-13 17:37:52.725481 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'db'
+2026-01-13 17:37:52.725510 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'group'
+2026-01-13 17:37:52.725524 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'db'
+2026-01-13 17:37:52.725532 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'group'
+2026-01-13 17:37:52.725555 0.00% [NOTICE] switch_loadable_module.c:717 Adding Limit interface 'db'
+2026-01-13 17:37:52.726005 0.00% [DEBUG] switch_scheduler.c:263 Added task 3 limit_hash_cleanup (mod_hash) to run at 1768301572
+2026-01-13 17:37:52.726760 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:37:52.726777 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:37:52.726858 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'hash'
+2026-01-13 17:37:52.726883 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'hash'
+2026-01-13 17:37:52.726895 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'hash_dump'
+2026-01-13 17:37:52.726906 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'hash_remote'
+2026-01-13 17:37:52.726926 0.00% [NOTICE] switch_loadable_module.c:717 Adding Limit interface 'hash'
+2026-01-13 17:37:52.729020 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:37:52.729037 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:37:52.729156 0.00% [ERR] mod_conference.c:3950 Open of conference.conf failed
+2026-01-13 17:37:52.729190 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'conference'
+2026-01-13 17:37:52.729209 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'conference_set_auto_outcall'
+2026-01-13 17:37:52.729226 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'conference'
+2026-01-13 17:37:52.729234 0.00% [NOTICE] switch_loadable_module.c:621 Adding Chat interface 'conf'
+2026-01-13 17:37:52.729650 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 10ms 1ch 8000bps
+2026-01-13 17:37:52.729658 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 20ms 1ch 8000bps
+2026-01-13 17:37:52.729660 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 30ms 1ch 8000bps
+2026-01-13 17:37:52.729662 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 40ms 1ch 8000bps
+2026-01-13 17:37:52.729664 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 50ms 1ch 8000bps
+2026-01-13 17:37:52.729666 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 60ms 1ch 8000bps
+2026-01-13 17:37:52.729668 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 70ms 1ch 8000bps
+2026-01-13 17:37:52.729670 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 80ms 1ch 8000bps
+2026-01-13 17:37:52.729672 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 90ms 1ch 8000bps
+2026-01-13 17:37:52.729674 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 100ms 1ch 8000bps
+2026-01-13 17:37:52.729676 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 110ms 1ch 8000bps
+2026-01-13 17:37:52.729678 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 120ms 1ch 8000bps
+2026-01-13 17:37:52.730072 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G723 4 G.723.1 6.3k 8000hz 120ms 1ch 6300bps
+2026-01-13 17:37:52.730079 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G723 4 G.723.1 6.3k 8000hz 90ms 1ch 6300bps
+2026-01-13 17:37:52.730081 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G723 4 G.723.1 6.3k 8000hz 60ms 1ch 6300bps
+2026-01-13 17:37:52.730084 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G723 4 G.723.1 6.3k 8000hz 30ms 1ch 6300bps
+2026-01-13 17:37:52.730152 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_bv.so
+**/usr/local/freeswitch/mod/mod_bv.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.731611 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:37:52.731632 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:37:52.731761 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec AMR 96 AMR / Octet Aligned 8000hz 20ms 1ch 12200bps
+2026-01-13 17:37:52.731783 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec AMR 97 AMR / Bandwidth Efficient 8000hz 20ms 1ch 12200bps
+2026-01-13 17:37:52.731796 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'amr_debug'
+2026-01-13 17:37:52.732184 0.00% [NOTICE] switch_loadable_module.c:229 Adding Codec H264 97 H.264 Video (passthru) 90000hz 0ms 1ch (VBR)
+2026-01-13 17:37:52.732205 0.00% [NOTICE] switch_loadable_module.c:229 Adding Codec H263 34 H.263 Video (passthru) 90000hz 0ms 1ch (VBR)
+2026-01-13 17:37:52.732217 0.00% [NOTICE] switch_loadable_module.c:229 Adding Codec H263-1998 115 H.263+ Video (passthru) 90000hz 0ms 1ch (VBR)
+2026-01-13 17:37:52.732233 0.00% [NOTICE] switch_loadable_module.c:229 Adding Codec H263-2000 121 H.263++ Video (passthru) 90000hz 0ms 1ch (VBR)
+2026-01-13 17:37:52.732252 0.00% [NOTICE] switch_loadable_module.c:229 Adding Codec H261 31 H.261 Video (passthru) 90000hz 0ms 1ch (VBR)
+2026-01-13 17:37:52.732663 0.00% [NOTICE] switch_loadable_module.c:273 Adding Dialplan 'XML'
+2026-01-13 17:37:52.733681 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:37:52.733699 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:37:52.733819 0.00% [NOTICE] switch_loadable_module.c:172 Adding Endpoint 'loopback'
+2026-01-13 17:37:52.733844 0.00% [NOTICE] switch_loadable_module.c:172 Adding Endpoint 'null'
+2026-01-13 17:37:52.733855 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'unloop'
+2026-01-13 17:37:52.734291 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'socket'
+2026-01-13 17:37:52.734314 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'event_sink'
+2026-01-13 17:37:52.734368 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_sndfile.so
+**/usr/local/freeswitch/mod/mod_sndfile.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.734745 0.00% [NOTICE] switch_loadable_module.c:455 Adding File Format 'PCMU'
+2026-01-13 17:37:52.734773 0.00% [NOTICE] switch_loadable_module.c:455 Adding File Format 'L16'
+2026-01-13 17:37:52.734785 0.00% [NOTICE] switch_loadable_module.c:455 Adding File Format 'PCMA'
+2026-01-13 17:37:52.734803 0.00% [NOTICE] switch_loadable_module.c:455 Adding File Format 'G729'
+2026-01-13 17:37:52.734824 0.00% [NOTICE] switch_loadable_module.c:455 Adding File Format 'G723'
+2026-01-13 17:37:52.734898 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_en.so
+**/usr/local/freeswitch/mod/mod_say_en.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.734955 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_zh.so
+**/usr/local/freeswitch/mod/mod_say_zh.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.735004 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_ru.so
+**/usr/local/freeswitch/mod/mod_say_ru.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.735053 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_fr.so
+**/usr/local/freeswitch/mod/mod_say_fr.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.735101 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_th.so
+**/usr/local/freeswitch/mod/mod_say_th.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.735150 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_he.so
+**/usr/local/freeswitch/mod/mod_say_he.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.735210 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_pt.so
+**/usr/local/freeswitch/mod/mod_say_pt.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.735260 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_de.so
+**/usr/local/freeswitch/mod/mod_say_de.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.735320 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_it.so
+**/usr/local/freeswitch/mod/mod_say_it.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.735375 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_nl.so
+**/usr/local/freeswitch/mod/mod_say_nl.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.735423 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_es.so
+**/usr/local/freeswitch/mod/mod_say_es.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.735472 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_hu.so
+**/usr/local/freeswitch/mod/mod_say_hu.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.735521 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_flite.so
+**/usr/local/freeswitch/mod/mod_flite.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.735579 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_tts_commandline.so
+**/usr/local/freeswitch/mod/mod_tts_commandline.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.736625 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:37:52.736644 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:37:52.736706 0.00% [ERR] mod_local_stream.c:1337 Open of local_stream.conf failed
+2026-01-13 17:37:52.736780 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_local_stream.so
+**Module load routine returned an error**
+2026-01-13 17:37:52.736861 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_tone_stream.so
+**/usr/local/freeswitch/mod/mod_tone_stream.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.736903 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_shout.so
+**/usr/local/freeswitch/mod/mod_shout.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.736950 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_xml_cdr.so
+**/usr/local/freeswitch/mod/mod_xml_cdr.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:37:52.737589 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:37:52.737606 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:37:52.738148 100.00% [INFO] switch_time.c:627 Clock synchronized to system time.
+2026-01-13 17:37:52.738310 100.00% [DEBUG] switch_loadable_module.c:910 Chat Thread Started
+2026-01-13 17:37:52.738487 100.00% [NOTICE] switch_core.c:1482 Created ip list rfc6598.auto default (deny)
+2026-01-13 17:37:52.738494 100.00% [NOTICE] switch_utils.c:665 Adding 100.64.0.0/10 (allow) [] to list rfc6598.auto
+2026-01-13 17:37:52.738497 100.00% [NOTICE] switch_core.c:1488 Created ip list rfc1918.auto default (deny)
+2026-01-13 17:37:52.738503 100.00% [NOTICE] switch_utils.c:665 Adding 10.0.0.0/8 (allow) [] to list rfc1918.auto
+2026-01-13 17:37:52.738505 100.00% [NOTICE] switch_utils.c:665 Adding 172.16.0.0/12 (allow) [] to list rfc1918.auto
+2026-01-13 17:37:52.738508 100.00% [NOTICE] switch_utils.c:665 Adding 192.168.0.0/16 (allow) [] to list rfc1918.auto
+2026-01-13 17:37:52.738527 100.00% [NOTICE] switch_utils.c:665 Adding fe80::/10 (allow) [] to list rfc1918.auto
+2026-01-13 17:37:52.738530 100.00% [NOTICE] switch_core.c:1497 Created ip list wan.auto default (allow)
+2026-01-13 17:37:52.738532 100.00% [NOTICE] switch_utils.c:665 Adding 0.0.0.0/8 (deny) [] to list wan.auto
+2026-01-13 17:37:52.738534 100.00% [NOTICE] switch_utils.c:665 Adding 10.0.0.0/8 (deny) [] to list wan.auto
+2026-01-13 17:37:52.738536 100.00% [NOTICE] switch_utils.c:665 Adding 172.16.0.0/12 (deny) [] to list wan.auto
+2026-01-13 17:37:52.738537 100.00% [NOTICE] switch_utils.c:665 Adding 192.168.0.0/16 (deny) [] to list wan.auto
+2026-01-13 17:37:52.738539 100.00% [NOTICE] switch_utils.c:665 Adding 169.254.0.0/16 (deny) [] to list wan.auto
+2026-01-13 17:37:52.738541 100.00% [NOTICE] switch_utils.c:665 Adding 100.64.0.0/10 (deny) [] to list wan.auto
+2026-01-13 17:37:52.738543 100.00% [NOTICE] switch_utils.c:665 Adding fe80::/10 (deny) [] to list wan.auto
+2026-01-13 17:37:52.738549 100.00% [NOTICE] switch_core.c:1509 Created ip list wan_v6.auto default (allow)
+2026-01-13 17:37:52.738550 100.00% [NOTICE] switch_utils.c:665 Adding 0.0.0.0/0 (deny) [] to list wan_v6.auto
+2026-01-13 17:37:52.738552 100.00% [NOTICE] switch_utils.c:665 Adding fe80::/10 (deny) [] to list wan_v6.auto
+2026-01-13 17:37:52.738554 100.00% [NOTICE] switch_core.c:1517 Created ip list wan_v4.auto default (allow)
+2026-01-13 17:37:52.738556 100.00% [NOTICE] switch_utils.c:665 Adding 0.0.0.0/8 (deny) [] to list wan_v4.auto
+2026-01-13 17:37:52.738558 100.00% [NOTICE] switch_utils.c:665 Adding 10.0.0.0/8 (deny) [] to list wan_v4.auto
+2026-01-13 17:37:52.738563 100.00% [NOTICE] switch_utils.c:665 Adding 172.16.0.0/12 (deny) [] to list wan_v4.auto
+2026-01-13 17:37:52.738565 100.00% [NOTICE] switch_utils.c:665 Adding 192.168.0.0/16 (deny) [] to list wan_v4.auto
+2026-01-13 17:37:52.738567 100.00% [NOTICE] switch_utils.c:665 Adding 169.254.0.0/16 (deny) [] to list wan_v4.auto
+2026-01-13 17:37:52.738569 100.00% [NOTICE] switch_utils.c:665 Adding 100.64.0.0/10 (deny) [] to list wan_v4.auto
+2026-01-13 17:37:52.738571 100.00% [NOTICE] switch_utils.c:665 Adding ::/0 (deny) [] to list wan_v4.auto
+2026-01-13 17:37:52.738572 100.00% [NOTICE] switch_core.c:1530 Created ip list any_v6.auto default (allow)
+2026-01-13 17:37:52.738574 100.00% [NOTICE] switch_utils.c:665 Adding 0.0.0.0/0 (deny) [] to list any_v6.auto
+2026-01-13 17:37:52.738576 100.00% [NOTICE] switch_core.c:1537 Created ip list any_v4.auto default (allow)
+2026-01-13 17:37:52.738578 100.00% [NOTICE] switch_utils.c:665 Adding ::/0 (deny) [] to list any_v4.auto
+2026-01-13 17:37:52.738581 100.00% [NOTICE] switch_core.c:1544 Created ip list nat.auto default (deny)
+2026-01-13 17:37:52.738584 100.00% [NOTICE] switch_core.c:1546 Adding 192.168.1.22/255.255.255.0 (deny) to list nat.auto
+2026-01-13 17:37:52.738586 100.00% [NOTICE] switch_utils.c:665 Adding 10.0.0.0/8 (allow) [] to list nat.auto
+2026-01-13 17:37:52.738496 100.00% [DEBUG] switch_loadable_module.c:910 Chat Thread Started
+2026-01-13 17:37:52.738588 100.00% [NOTICE] switch_utils.c:665 Adding 172.16.0.0/12 (allow) [] to list nat.auto
+2026-01-13 17:37:52.738593 100.00% [NOTICE] switch_utils.c:665 Adding 192.168.0.0/16 (allow) [] to list nat.auto
+2026-01-13 17:37:52.738595 100.00% [NOTICE] switch_utils.c:665 Adding 100.64.0.0/10 (allow) [] to list nat.auto
+2026-01-13 17:37:52.738597 100.00% [NOTICE] switch_core.c:1556 Created ip list loopback.auto default (deny)
+2026-01-13 17:37:52.738599 100.00% [NOTICE] switch_utils.c:665 Adding 127.0.0.0/8 (allow) [] to list loopback.auto
+2026-01-13 17:37:52.738601 100.00% [NOTICE] switch_utils.c:665 Adding ::1/128 (allow) [] to list loopback.auto
+2026-01-13 17:37:52.738603 100.00% [NOTICE] switch_core.c:1563 Created ip list localnet.auto default (deny)
+2026-01-13 17:37:52.738605 100.00% [NOTICE] switch_core.c:1566 Adding 192.168.1.22/255.255.255.0 (allow) to list localnet.auto
+2026-01-13 17:37:52.738814 100.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:37:52.738822 100.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:37:52.739077 100.00% [DEBUG] mod_event_socket.c:2982 Socket up listening on 127.0.0.1:8021
+2026-01-13 17:37:52.739338 100.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:37:52.739357 100.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:37:52.740015 100.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:37:52.740046 100.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:37:52.740172 100.00% [INFO] switch_core.c:2503 
+FreeSWITCH Version 1.10.12-release+git~20240802T210227Z~a88d069d6f~64bit (git a88d069 2024-08-02 21:02:27Z 64bit)
+
+FreeSWITCH Started
+Max Sessions [1000]
+Session Rate [30]
+SQL [Enabled]
+2026-01-13 17:38:18.138076 99.87% [INFO] switch_core.c:2891 Shutting down
+2026-01-13 17:38:18.138076 99.87% [DEBUG] switch_loadable_module.c:919 Chat Thread Ended
+2026-01-13 17:38:18.138076 99.87% [DEBUG] switch_loadable_module.c:919 Chat Thread Ended
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1230 Deleting Application 'db'
+2026-01-13 17:38:18.138076 99.87% [DEBUG] switch_loadable_module.c:1232 Write lock interface 'db' to wait for existing references.
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1230 Deleting Application 'group'
+2026-01-13 17:38:18.138076 99.87% [DEBUG] switch_loadable_module.c:1232 Write lock interface 'group' to wait for existing references.
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1285 Deleting API Function 'db'
+2026-01-13 17:38:18.138076 99.87% [DEBUG] switch_loadable_module.c:1287 Write lock interface 'db' to wait for existing references.
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1285 Deleting API Function 'group'
+2026-01-13 17:38:18.138076 99.87% [DEBUG] switch_loadable_module.c:1287 Write lock interface 'group' to wait for existing references.
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1608 Deleting Limit interface 'db'
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1197 Deleting Dialplan 'XML'
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec SPEEX 99 Speex 32000hz 20ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec SPEEX 99 Speex 16000hz 20ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec SPEEX 99 Speex 8000hz 20ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec VP8 99 VP8 Video 90000hz 0ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec VP9 99 VP9 Video 90000hz 0ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1285 Deleting API Function 'vpx'
+2026-01-13 17:38:18.138076 99.87% [DEBUG] switch_loadable_module.c:1287 Write lock interface 'vpx' to wait for existing references.
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1230 Deleting Application 'esf_page_group'
+2026-01-13 17:38:18.138076 99.87% [DEBUG] switch_loadable_module.c:1232 Write lock interface 'esf_page_group' to wait for existing references.
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec G723 4 G.723.1 6.3k 8000hz 120ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec G723 4 G.723.1 6.3k 8000hz 90ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec G723 4 G.723.1 6.3k 8000hz 60ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec G723 4 G.723.1 6.3k 8000hz 30ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec H264 97 H.264 Video (passthru) 90000hz 0ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec H263 34 H.263 Video (passthru) 90000hz 0ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec H263-1998 115 H.263+ Video (passthru) 90000hz 0ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec H263-2000 121 H.263++ Video (passthru) 90000hz 0ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec H261 31 H.261 Video (passthru) 90000hz 0ms
+2026-01-13 17:38:18.138076 99.87% [DEBUG] switch_loadable_module.c:1350 Write lock interface 'mod_native_file' to wait for existing references.
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1360 Deleting File Format 'PCMU'
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1360 Deleting File Format 'L16'
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1360 Deleting File Format 'PCMA'
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1360 Deleting File Format 'G729'
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1360 Deleting File Format 'G723'
+2026-01-13 17:38:18.138076 99.87% [DEBUG] switch_loadable_module.c:1117 Write lock interface 'loopback' to wait for existing references.
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1125 Deleting Endpoint 'loopback'
+2026-01-13 17:38:18.138076 99.87% [DEBUG] switch_loadable_module.c:1117 Write lock interface 'null' to wait for existing references.
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1125 Deleting Endpoint 'null'
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1230 Deleting Application 'unloop'
+2026-01-13 17:38:18.138076 99.87% [DEBUG] switch_loadable_module.c:1232 Write lock interface 'unloop' to wait for existing references.
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_event.c:467 Subclass reservation deleted for mod_loopback.c:loopback::bowout
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_event.c:467 Subclass reservation deleted for mod_loopback.c:loopback::direct
+2026-01-13 17:38:18.138076 99.87% [DEBUG] switch_event.c:2156 Event Binding deleted for mod_loopback:RELOADXML
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec AMR 96 AMR / Octet Aligned 8000hz 20ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec AMR 97 AMR / Bandwidth Efficient 8000hz 20ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1285 Deleting API Function 'amr_debug'
+2026-01-13 17:38:18.138076 99.87% [DEBUG] switch_loadable_module.c:1287 Write lock interface 'amr_debug' to wait for existing references.
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1285 Deleting API Function 'console'
+2026-01-13 17:38:18.138076 99.87% [DEBUG] switch_loadable_module.c:1287 Write lock interface 'console' to wait for existing references.
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PROXY-VID 31 PROXY VIDEO PASS-THROUGH 90000hz 0ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PROXY 0 PROXY PASS-THROUGH 8000hz 20ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PROXY 0 PROXY PASS-THROUGH 8000hz 20ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 11025hz 32ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 11025hz 32ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 11025hz 40ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 11025hz 40ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 22050hz 20ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 22050hz 20ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 44100hz 30ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 44100hz 30ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 44100hz 20ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 44100hz 20ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 44100hz 10ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 44100hz 10ms
+2026-01-13 17:38:18.138076 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 48000hz 40ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 48000hz 40ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 48000hz 30ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 48000hz 30ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 48000hz 20ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 48000hz 20ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 8ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 8ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 6ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 6ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 4ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 4ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 2ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 2ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 8ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 8ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 6ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 6ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 4ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 4ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 2ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 2ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 8ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 8ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 6ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 6ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 4ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 4ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 2ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 2ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 48000hz 10ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 48000hz 10ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 48000hz 8ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 48000hz 8ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 48000hz 6ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 48000hz 6ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 48000hz 4ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 48000hz 4ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 48000hz 2ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 48000hz 2ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 24000hz 60ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 24000hz 60ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 24000hz 40ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 24000hz 40ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 24000hz 20ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 24000hz 20ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 12000hz 100ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 12000hz 100ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 12000hz 80ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 12000hz 80ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 12000hz 60ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 12000hz 60ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 12000hz 40ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 12000hz 40ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 12000hz 20ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 12000hz 20ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 10ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 10ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 20ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 20ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 30ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 30ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 40ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 40ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 50ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 50ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 60ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 32000hz 60ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 10ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 10ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 20ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 20ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 30ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 30ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 40ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 40ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 50ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 50ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 60ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 16000hz 60ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 10ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 10ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 20ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 20ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 30ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 30ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 40ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 40ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 50ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 50ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 60ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 60ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 70ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 70ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 80ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 80ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 90ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 90ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 100ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 100ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 110ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 110ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 120ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec L16 100 RAW Signed Linear (16 bit) 8000hz 120ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 48000hz 10ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 48000hz 10ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 8000hz 10ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 48000hz 20ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 48000hz 20ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 8000hz 20ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 48000hz 30ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 48000hz 30ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 8000hz 30ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 48000hz 40ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 48000hz 40ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 8000hz 40ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 8000hz 50ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 8000hz 60ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 8000hz 70ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 8000hz 80ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 8000hz 90ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 8000hz 100ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 8000hz 110ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMU 0 G.711 ulaw 8000hz 120ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMA 8 G.711 alaw 8000hz 10ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMA 8 G.711 alaw 8000hz 20ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMA 8 G.711 alaw 8000hz 30ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMA 8 G.711 alaw 8000hz 40ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMA 8 G.711 alaw 8000hz 50ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMA 8 G.711 alaw 8000hz 60ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMA 8 G.711 alaw 8000hz 70ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMA 8 G.711 alaw 8000hz 80ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMA 8 G.711 alaw 8000hz 90ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMA 8 G.711 alaw 8000hz 100ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMA 8 G.711 alaw 8000hz 110ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1153 Deleting Codec PCMA 8 G.711 alaw 8000hz 120ms
+2026-01-13 17:38:18.158070 99.87% [NOTICE] switch_loadable_module.c:1230 Deleting Application 'conference'
+2026-01-13 17:38:18.158070 99.87% [DEBUG] switch_loadable_module.c:1232 Write lock interface 'conference' to wait for existing references.
+2026-01-13 17:38:23.285525 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:38:23.285546 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:38:23.285626 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'console'
+2026-01-13 17:38:23.286700 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:38:23.286729 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:38:23.286797 0.00% [ERR] mod_callcenter.c:1512 Open of callcenter.conf failed
+2026-01-13 17:38:23.286804 0.00% [DEBUG] switch_event.c:2196 Event Binding deleted for mod_callcenter:PRESENCE_PROBE
+2026-01-13 17:38:23.286808 0.00% [NOTICE] switch_event.c:467 Subclass reservation deleted for mod_callcenter.c:callcenter::info
+2026-01-13 17:38:23.286887 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_callcenter.so
+**Module load routine returned an error**
+2026-01-13 17:38:23.287961 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:38:23.287983 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:38:23.290221 0.00% [INFO] switch_core_sqldb.c:1840 fifo Starting SQL thread.
+2026-01-13 17:38:23.292422 0.00% [INFO] mod_fifo.c:4647 cool_fifo@ configured
+2026-01-13 17:38:23.292575 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'fifo'
+2026-01-13 17:38:23.292598 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'fifo_track_call'
+2026-01-13 17:38:23.292615 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'fifo'
+2026-01-13 17:38:23.292623 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'fifo_member'
+2026-01-13 17:38:23.292631 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'fifo_add_outbound'
+2026-01-13 17:38:23.292644 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'fifo_check_bridge'
+2026-01-13 17:38:23.292715 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_sms.so
+**/usr/local/freeswitch/mod/mod_sms.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.293126 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'play_fsv'
+2026-01-13 17:38:23.293147 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'record_fsv'
+2026-01-13 17:38:23.293160 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'play_yuv'
+2026-01-13 17:38:23.293173 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'decode_video'
+2026-01-13 17:38:23.293188 0.00% [NOTICE] switch_loadable_module.c:455 Adding File Format 'fsv'
+2026-01-13 17:38:23.293586 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'esf_page_group'
+2026-01-13 17:38:23.293980 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'expr'
+2026-01-13 17:38:23.294589 0.00% [NOTICE] switch_loadable_module.c:172 Adding Endpoint 'error'
+2026-01-13 17:38:23.294608 0.00% [NOTICE] switch_loadable_module.c:172 Adding Endpoint 'group'
+2026-01-13 17:38:23.294616 0.00% [NOTICE] switch_loadable_module.c:172 Adding Endpoint 'user'
+2026-01-13 17:38:23.294625 0.00% [NOTICE] switch_loadable_module.c:172 Adding Endpoint 'pickup'
+2026-01-13 17:38:23.294643 0.00% [NOTICE] switch_loadable_module.c:273 Adding Dialplan 'inline'
+2026-01-13 17:38:23.294655 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'blind_transfer_ack'
+2026-01-13 17:38:23.294679 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'bind_digit_action'
+2026-01-13 17:38:23.294688 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'capture'
+2026-01-13 17:38:23.294708 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'clear_digit_action'
+2026-01-13 17:38:23.294725 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'digit_action_set_realm'
+2026-01-13 17:38:23.294739 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'privacy'
+2026-01-13 17:38:23.294763 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set_audio_level'
+2026-01-13 17:38:23.294776 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set_mute'
+2026-01-13 17:38:23.294794 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'flush_dtmf'
+2026-01-13 17:38:23.294809 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'hold'
+2026-01-13 17:38:23.294820 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'unhold'
+2026-01-13 17:38:23.294840 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'mutex'
+2026-01-13 17:38:23.294874 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'page'
+2026-01-13 17:38:23.294882 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'transfer'
+2026-01-13 17:38:23.294894 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'check_acl'
+2026-01-13 17:38:23.294913 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'verbose_events'
+2026-01-13 17:38:23.294927 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'novideo'
+2026-01-13 17:38:23.294941 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'cng_plc'
+2026-01-13 17:38:23.294961 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'early_hangup'
+2026-01-13 17:38:23.294975 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'sleep'
+2026-01-13 17:38:23.294987 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'delay_echo'
+2026-01-13 17:38:23.295005 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'strftime'
+2026-01-13 17:38:23.295024 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'phrase'
+2026-01-13 17:38:23.295043 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'eval'
+2026-01-13 17:38:23.295056 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set_media_stats'
+2026-01-13 17:38:23.295070 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'stop'
+2026-01-13 17:38:23.295090 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set_zombie_exec'
+2026-01-13 17:38:23.295109 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'pre_answer'
+2026-01-13 17:38:23.295117 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'answer'
+2026-01-13 17:38:23.295143 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'wait_for_answer'
+2026-01-13 17:38:23.295152 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'wait_for_video_ready'
+2026-01-13 17:38:23.295167 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'hangup'
+2026-01-13 17:38:23.295182 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set_name'
+2026-01-13 17:38:23.295194 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'presence'
+2026-01-13 17:38:23.295217 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'log'
+2026-01-13 17:38:23.295229 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'info'
+2026-01-13 17:38:23.295242 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'event'
+2026-01-13 17:38:23.295257 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'sound_test'
+2026-01-13 17:38:23.295271 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'export'
+2026-01-13 17:38:23.295291 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'bridge_export'
+2026-01-13 17:38:23.295311 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set'
+2026-01-13 17:38:23.295322 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'multiset'
+2026-01-13 17:38:23.295341 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'push'
+2026-01-13 17:38:23.295358 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'unshift'
+2026-01-13 17:38:23.295381 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set_global'
+2026-01-13 17:38:23.295422 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set_profile_var'
+2026-01-13 17:38:23.295437 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'unset'
+2026-01-13 17:38:23.295445 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'multiunset'
+2026-01-13 17:38:23.295460 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'capture_text'
+2026-01-13 17:38:23.295472 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'acknowledge_call'
+2026-01-13 17:38:23.295481 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'ring_ready'
+2026-01-13 17:38:23.295493 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'remove_bugs'
+2026-01-13 17:38:23.295510 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'break'
+2026-01-13 17:38:23.295527 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'detect_speech'
+2026-01-13 17:38:23.295543 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'play_and_detect_speech'
+2026-01-13 17:38:23.295564 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'ivr'
+2026-01-13 17:38:23.295584 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'redirect'
+2026-01-13 17:38:23.295595 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'video_refresh'
+2026-01-13 17:38:23.295613 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'video_decode'
+2026-01-13 17:38:23.295625 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'send_info'
+2026-01-13 17:38:23.295644 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'jitterbuffer'
+2026-01-13 17:38:23.295663 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'send_display'
+2026-01-13 17:38:23.295683 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'respond'
+2026-01-13 17:38:23.295698 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'deflect'
+2026-01-13 17:38:23.295718 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'recovery_refresh'
+2026-01-13 17:38:23.295734 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'reuse_caller_profile'
+2026-01-13 17:38:23.295753 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'queue_dtmf'
+2026-01-13 17:38:23.295763 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'send_dtmf'
+2026-01-13 17:38:23.295780 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'sched_cancel'
+2026-01-13 17:38:23.295790 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'sched_hangup'
+2026-01-13 17:38:23.295804 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'sched_broadcast'
+2026-01-13 17:38:23.295820 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'sched_transfer'
+2026-01-13 17:38:23.295830 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'execute_extension'
+2026-01-13 17:38:23.295842 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'sched_heartbeat'
+2026-01-13 17:38:23.295859 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'enable_heartbeat'
+2026-01-13 17:38:23.295866 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'filter_codecs'
+2026-01-13 17:38:23.295879 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'enable_keepalive'
+2026-01-13 17:38:23.295899 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'media_reset'
+2026-01-13 17:38:23.295914 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'mkdir'
+2026-01-13 17:38:23.295932 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'rename'
+2026-01-13 17:38:23.295951 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'transfer_vars'
+2026-01-13 17:38:23.295973 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'soft_hold'
+2026-01-13 17:38:23.295984 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'bind_meta_app'
+2026-01-13 17:38:23.295999 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'unbind_meta_app'
+2026-01-13 17:38:23.296016 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'block_dtmf'
+2026-01-13 17:38:23.296033 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'unblock_dtmf'
+2026-01-13 17:38:23.296050 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'intercept'
+2026-01-13 17:38:23.296073 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'eavesdrop'
+2026-01-13 17:38:23.296090 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'native_eavesdrop'
+2026-01-13 17:38:23.296100 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'three_way'
+2026-01-13 17:38:23.296116 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'set_user'
+2026-01-13 17:38:23.296135 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'stop_dtmf'
+2026-01-13 17:38:23.296158 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'start_dtmf'
+2026-01-13 17:38:23.296168 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'stop_dtmf_generate'
+2026-01-13 17:38:23.296182 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'start_dtmf_generate'
+2026-01-13 17:38:23.296197 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'stop_tone_detect'
+2026-01-13 17:38:23.296213 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'fax_detect'
+2026-01-13 17:38:23.296231 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'tone_detect'
+2026-01-13 17:38:23.296247 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'echo'
+2026-01-13 17:38:23.296265 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'park'
+2026-01-13 17:38:23.296282 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'park_state'
+2026-01-13 17:38:23.296293 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'gentones'
+2026-01-13 17:38:23.296311 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'playback'
+2026-01-13 17:38:23.296332 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'broadcast'
+2026-01-13 17:38:23.296349 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'endless_playback'
+2026-01-13 17:38:23.296371 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'loop_playback'
+2026-01-13 17:38:23.296387 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'att_xfer'
+2026-01-13 17:38:23.296394 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'read'
+2026-01-13 17:38:23.296407 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'play_and_get_digits'
+2026-01-13 17:38:23.296430 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'stop_video_write_overlay'
+2026-01-13 17:38:23.296446 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'video_write_overlay'
+2026-01-13 17:38:23.296465 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'stop_record_session'
+2026-01-13 17:38:23.296475 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'record_session'
+2026-01-13 17:38:23.296492 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'record_session_mask'
+2026-01-13 17:38:23.296509 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'record_session_unmask'
+2026-01-13 17:38:23.296529 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'record_session_pause'
+2026-01-13 17:38:23.296540 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'record_session_resume'
+2026-01-13 17:38:23.296568 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'record'
+2026-01-13 17:38:23.296590 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'preprocess'
+2026-01-13 17:38:23.296608 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'stop_displace_session'
+2026-01-13 17:38:23.296621 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'displace_session'
+2026-01-13 17:38:23.296643 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'speak'
+2026-01-13 17:38:23.296653 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'clear_speech_cache'
+2026-01-13 17:38:23.296667 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'bridge'
+2026-01-13 17:38:23.296686 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'system'
+2026-01-13 17:38:23.296701 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'bgsystem'
+2026-01-13 17:38:23.296717 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'say'
+2026-01-13 17:38:23.296738 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'detect_audio'
+2026-01-13 17:38:23.296748 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'detect_silence'
+2026-01-13 17:38:23.296767 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'wait_for_silence'
+2026-01-13 17:38:23.296793 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'session_loglevel'
+2026-01-13 17:38:23.296812 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'limit'
+2026-01-13 17:38:23.296822 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'limit_hash'
+2026-01-13 17:38:23.296845 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'limit_execute'
+2026-01-13 17:38:23.296867 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'limit_hash_execute'
+2026-01-13 17:38:23.296883 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'pickup'
+2026-01-13 17:38:23.296894 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'deduplicate_dtmf'
+2026-01-13 17:38:23.296910 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'vad_test'
+2026-01-13 17:38:23.296930 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'debug_media'
+2026-01-13 17:38:23.296946 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'strepoch'
+2026-01-13 17:38:23.296958 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'page'
+2026-01-13 17:38:23.296976 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'strmicroepoch'
+2026-01-13 17:38:23.296993 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'chat'
+2026-01-13 17:38:23.297011 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'strftime'
+2026-01-13 17:38:23.297031 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'presence'
+2026-01-13 17:38:23.297050 0.00% [NOTICE] switch_loadable_module.c:455 Adding File Format 'file_string'
+2026-01-13 17:38:23.297059 0.00% [NOTICE] switch_loadable_module.c:455 Adding File Format 'file'
+2026-01-13 17:38:23.297071 0.00% [NOTICE] switch_loadable_module.c:621 Adding Chat interface 'event'
+2026-01-13 17:38:23.297084 0.00% [NOTICE] switch_loadable_module.c:621 Adding Chat interface 'api'
+2026-01-13 17:38:23.299357 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:38:23.299380 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:38:23.299462 0.00% [NOTICE] switch_loadable_module.c:273 Adding Dialplan 'enum'
+2026-01-13 17:38:23.299483 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'enum'
+2026-01-13 17:38:23.299493 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'enum'
+2026-01-13 17:38:23.299500 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'enum_auto'
+2026-01-13 17:38:23.299575 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_valet_parking.so
+**/usr/local/freeswitch/mod/mod_valet_parking.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.299615 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_spandsp.so
+**/usr/local/freeswitch/mod/mod_spandsp.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.300631 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:38:23.300648 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:38:23.301945 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'db'
+2026-01-13 17:38:23.301968 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'group'
+2026-01-13 17:38:23.301979 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'db'
+2026-01-13 17:38:23.301986 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'group'
+2026-01-13 17:38:23.302002 0.00% [NOTICE] switch_loadable_module.c:717 Adding Limit interface 'db'
+2026-01-13 17:38:23.302498 0.00% [DEBUG] switch_scheduler.c:263 Added task 3 limit_hash_cleanup (mod_hash) to run at 1768301603
+2026-01-13 17:38:23.303283 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:38:23.303301 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:38:23.303441 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'hash'
+2026-01-13 17:38:23.303474 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'hash'
+2026-01-13 17:38:23.303485 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'hash_dump'
+2026-01-13 17:38:23.303498 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'hash_remote'
+2026-01-13 17:38:23.303516 0.00% [NOTICE] switch_loadable_module.c:717 Adding Limit interface 'hash'
+2026-01-13 17:38:23.305060 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:38:23.305079 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:38:23.305180 0.00% [ERR] mod_conference.c:3950 Open of conference.conf failed
+2026-01-13 17:38:23.305204 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'conference'
+2026-01-13 17:38:23.305227 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'conference_set_auto_outcall'
+2026-01-13 17:38:23.305238 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'conference'
+2026-01-13 17:38:23.305254 0.00% [NOTICE] switch_loadable_module.c:621 Adding Chat interface 'conf'
+2026-01-13 17:38:23.305654 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 10ms 1ch 8000bps
+2026-01-13 17:38:23.305659 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 20ms 1ch 8000bps
+2026-01-13 17:38:23.305661 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 30ms 1ch 8000bps
+2026-01-13 17:38:23.305664 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 40ms 1ch 8000bps
+2026-01-13 17:38:23.305665 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 50ms 1ch 8000bps
+2026-01-13 17:38:23.305667 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 60ms 1ch 8000bps
+2026-01-13 17:38:23.305669 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 70ms 1ch 8000bps
+2026-01-13 17:38:23.305671 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 80ms 1ch 8000bps
+2026-01-13 17:38:23.305673 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 90ms 1ch 8000bps
+2026-01-13 17:38:23.305675 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 100ms 1ch 8000bps
+2026-01-13 17:38:23.305677 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 110ms 1ch 8000bps
+2026-01-13 17:38:23.305678 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G729 18 G.729 8000hz 120ms 1ch 8000bps
+2026-01-13 17:38:23.306054 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G723 4 G.723.1 6.3k 8000hz 120ms 1ch 6300bps
+2026-01-13 17:38:23.306060 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G723 4 G.723.1 6.3k 8000hz 90ms 1ch 6300bps
+2026-01-13 17:38:23.306063 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G723 4 G.723.1 6.3k 8000hz 60ms 1ch 6300bps
+2026-01-13 17:38:23.306065 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec G723 4 G.723.1 6.3k 8000hz 30ms 1ch 6300bps
+2026-01-13 17:38:23.306141 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_bv.so
+**/usr/local/freeswitch/mod/mod_bv.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.307518 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:38:23.307537 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:38:23.307665 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec AMR 96 AMR / Octet Aligned 8000hz 20ms 1ch 12200bps
+2026-01-13 17:38:23.307689 0.00% [NOTICE] switch_loadable_module.c:223 Adding Codec AMR 97 AMR / Bandwidth Efficient 8000hz 20ms 1ch 12200bps
+2026-01-13 17:38:23.307703 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'amr_debug'
+2026-01-13 17:38:23.308100 0.00% [NOTICE] switch_loadable_module.c:229 Adding Codec H264 97 H.264 Video (passthru) 90000hz 0ms 1ch (VBR)
+2026-01-13 17:38:23.308127 0.00% [NOTICE] switch_loadable_module.c:229 Adding Codec H263 34 H.263 Video (passthru) 90000hz 0ms 1ch (VBR)
+2026-01-13 17:38:23.308140 0.00% [NOTICE] switch_loadable_module.c:229 Adding Codec H263-1998 115 H.263+ Video (passthru) 90000hz 0ms 1ch (VBR)
+2026-01-13 17:38:23.308162 0.00% [NOTICE] switch_loadable_module.c:229 Adding Codec H263-2000 121 H.263++ Video (passthru) 90000hz 0ms 1ch (VBR)
+2026-01-13 17:38:23.308184 0.00% [NOTICE] switch_loadable_module.c:229 Adding Codec H261 31 H.261 Video (passthru) 90000hz 0ms 1ch (VBR)
+2026-01-13 17:38:23.308601 0.00% [NOTICE] switch_loadable_module.c:273 Adding Dialplan 'XML'
+2026-01-13 17:38:23.309650 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:38:23.309671 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:38:23.309762 0.00% [NOTICE] switch_loadable_module.c:172 Adding Endpoint 'loopback'
+2026-01-13 17:38:23.309787 0.00% [NOTICE] switch_loadable_module.c:172 Adding Endpoint 'null'
+2026-01-13 17:38:23.309801 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'unloop'
+2026-01-13 17:38:23.310258 0.00% [NOTICE] switch_loadable_module.c:329 Adding Application 'socket'
+2026-01-13 17:38:23.310290 0.00% [NOTICE] switch_loadable_module.c:389 Adding API Function 'event_sink'
+2026-01-13 17:38:23.310356 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_sndfile.so
+**/usr/local/freeswitch/mod/mod_sndfile.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.310743 0.00% [NOTICE] switch_loadable_module.c:455 Adding File Format 'PCMU'
+2026-01-13 17:38:23.310798 0.00% [NOTICE] switch_loadable_module.c:455 Adding File Format 'L16'
+2026-01-13 17:38:23.310819 0.00% [NOTICE] switch_loadable_module.c:455 Adding File Format 'PCMA'
+2026-01-13 17:38:23.310832 0.00% [NOTICE] switch_loadable_module.c:455 Adding File Format 'G729'
+2026-01-13 17:38:23.310844 0.00% [NOTICE] switch_loadable_module.c:455 Adding File Format 'G723'
+2026-01-13 17:38:23.310901 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_en.so
+**/usr/local/freeswitch/mod/mod_say_en.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.310994 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_zh.so
+**/usr/local/freeswitch/mod/mod_say_zh.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.311032 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_ru.so
+**/usr/local/freeswitch/mod/mod_say_ru.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.311069 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_fr.so
+**/usr/local/freeswitch/mod/mod_say_fr.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.311105 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_th.so
+**/usr/local/freeswitch/mod/mod_say_th.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.311141 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_he.so
+**/usr/local/freeswitch/mod/mod_say_he.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.311181 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_pt.so
+**/usr/local/freeswitch/mod/mod_say_pt.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.311213 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_de.so
+**/usr/local/freeswitch/mod/mod_say_de.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.311245 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_it.so
+**/usr/local/freeswitch/mod/mod_say_it.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.311281 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_nl.so
+**/usr/local/freeswitch/mod/mod_say_nl.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.311318 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_es.so
+**/usr/local/freeswitch/mod/mod_say_es.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.311359 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_say_hu.so
+**/usr/local/freeswitch/mod/mod_say_hu.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.311395 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_flite.so
+**/usr/local/freeswitch/mod/mod_flite.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.311435 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_tts_commandline.so
+**/usr/local/freeswitch/mod/mod_tts_commandline.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.312553 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:38:23.312573 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:38:23.312630 0.00% [ERR] mod_local_stream.c:1337 Open of local_stream.conf failed
+2026-01-13 17:38:23.312721 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_local_stream.so
+**Module load routine returned an error**
+2026-01-13 17:38:23.312799 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_tone_stream.so
+**/usr/local/freeswitch/mod/mod_tone_stream.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.312827 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_shout.so
+**/usr/local/freeswitch/mod/mod_shout.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.312865 0.00% [CRIT] switch_loadable_module.c:1754 Error Loading module /usr/local/freeswitch/mod/mod_xml_cdr.so
+**/usr/local/freeswitch/mod/mod_xml_cdr.so: cannot open shared object file: No such file or directory**
+2026-01-13 17:38:23.313585 0.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:38:23.313603 0.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:38:23.314018 100.00% [INFO] switch_time.c:627 Clock synchronized to system time.
+2026-01-13 17:38:23.314124 100.00% [DEBUG] switch_loadable_module.c:910 Chat Thread Started
+2026-01-13 17:38:23.314310 100.00% [DEBUG] switch_loadable_module.c:910 Chat Thread Started
+2026-01-13 17:38:23.314455 100.00% [NOTICE] switch_core.c:1482 Created ip list rfc6598.auto default (deny)
+2026-01-13 17:38:23.314477 100.00% [NOTICE] switch_utils.c:665 Adding 100.64.0.0/10 (allow) [] to list rfc6598.auto
+2026-01-13 17:38:23.314481 100.00% [NOTICE] switch_core.c:1488 Created ip list rfc1918.auto default (deny)
+2026-01-13 17:38:23.314483 100.00% [NOTICE] switch_utils.c:665 Adding 10.0.0.0/8 (allow) [] to list rfc1918.auto
+2026-01-13 17:38:23.314485 100.00% [NOTICE] switch_utils.c:665 Adding 172.16.0.0/12 (allow) [] to list rfc1918.auto
+2026-01-13 17:38:23.314487 100.00% [NOTICE] switch_utils.c:665 Adding 192.168.0.0/16 (allow) [] to list rfc1918.auto
+2026-01-13 17:38:23.314489 100.00% [NOTICE] switch_utils.c:665 Adding fe80::/10 (allow) [] to list rfc1918.auto
+2026-01-13 17:38:23.314491 100.00% [NOTICE] switch_core.c:1497 Created ip list wan.auto default (allow)
+2026-01-13 17:38:23.314493 100.00% [NOTICE] switch_utils.c:665 Adding 0.0.0.0/8 (deny) [] to list wan.auto
+2026-01-13 17:38:23.314495 100.00% [NOTICE] switch_utils.c:665 Adding 10.0.0.0/8 (deny) [] to list wan.auto
+2026-01-13 17:38:23.314497 100.00% [NOTICE] switch_utils.c:665 Adding 172.16.0.0/12 (deny) [] to list wan.auto
+2026-01-13 17:38:23.314498 100.00% [NOTICE] switch_utils.c:665 Adding 192.168.0.0/16 (deny) [] to list wan.auto
+2026-01-13 17:38:23.314500 100.00% [NOTICE] switch_utils.c:665 Adding 169.254.0.0/16 (deny) [] to list wan.auto
+2026-01-13 17:38:23.314502 100.00% [NOTICE] switch_utils.c:665 Adding 100.64.0.0/10 (deny) [] to list wan.auto
+2026-01-13 17:38:23.314504 100.00% [NOTICE] switch_utils.c:665 Adding fe80::/10 (deny) [] to list wan.auto
+2026-01-13 17:38:23.314506 100.00% [NOTICE] switch_core.c:1509 Created ip list wan_v6.auto default (allow)
+2026-01-13 17:38:23.314507 100.00% [NOTICE] switch_utils.c:665 Adding 0.0.0.0/0 (deny) [] to list wan_v6.auto
+2026-01-13 17:38:23.314509 100.00% [NOTICE] switch_utils.c:665 Adding fe80::/10 (deny) [] to list wan_v6.auto
+2026-01-13 17:38:23.314511 100.00% [NOTICE] switch_core.c:1517 Created ip list wan_v4.auto default (allow)
+2026-01-13 17:38:23.314513 100.00% [NOTICE] switch_utils.c:665 Adding 0.0.0.0/8 (deny) [] to list wan_v4.auto
+2026-01-13 17:38:23.314515 100.00% [NOTICE] switch_utils.c:665 Adding 10.0.0.0/8 (deny) [] to list wan_v4.auto
+2026-01-13 17:38:23.314517 100.00% [NOTICE] switch_utils.c:665 Adding 172.16.0.0/12 (deny) [] to list wan_v4.auto
+2026-01-13 17:38:23.314519 100.00% [NOTICE] switch_utils.c:665 Adding 192.168.0.0/16 (deny) [] to list wan_v4.auto
+2026-01-13 17:38:23.314521 100.00% [NOTICE] switch_utils.c:665 Adding 169.254.0.0/16 (deny) [] to list wan_v4.auto
+2026-01-13 17:38:23.314523 100.00% [NOTICE] switch_utils.c:665 Adding 100.64.0.0/10 (deny) [] to list wan_v4.auto
+2026-01-13 17:38:23.314525 100.00% [NOTICE] switch_utils.c:665 Adding ::/0 (deny) [] to list wan_v4.auto
+2026-01-13 17:38:23.314527 100.00% [NOTICE] switch_core.c:1530 Created ip list any_v6.auto default (allow)
+2026-01-13 17:38:23.314528 100.00% [NOTICE] switch_utils.c:665 Adding 0.0.0.0/0 (deny) [] to list any_v6.auto
+2026-01-13 17:38:23.314530 100.00% [NOTICE] switch_core.c:1537 Created ip list any_v4.auto default (allow)
+2026-01-13 17:38:23.314532 100.00% [NOTICE] switch_utils.c:665 Adding ::/0 (deny) [] to list any_v4.auto
+2026-01-13 17:38:23.314534 100.00% [NOTICE] switch_core.c:1544 Created ip list nat.auto default (deny)
+2026-01-13 17:38:23.314538 100.00% [NOTICE] switch_core.c:1546 Adding 192.168.1.22/255.255.255.0 (deny) to list nat.auto
+2026-01-13 17:38:23.314540 100.00% [NOTICE] switch_utils.c:665 Adding 10.0.0.0/8 (allow) [] to list nat.auto
+2026-01-13 17:38:23.314545 100.00% [NOTICE] switch_utils.c:665 Adding 172.16.0.0/12 (allow) [] to list nat.auto
+2026-01-13 17:38:23.314547 100.00% [NOTICE] switch_utils.c:665 Adding 192.168.0.0/16 (allow) [] to list nat.auto
+2026-01-13 17:38:23.314549 100.00% [NOTICE] switch_utils.c:665 Adding 100.64.0.0/10 (allow) [] to list nat.auto
+2026-01-13 17:38:23.314552 100.00% [NOTICE] switch_core.c:1556 Created ip list loopback.auto default (deny)
+2026-01-13 17:38:23.314554 100.00% [NOTICE] switch_utils.c:665 Adding 127.0.0.0/8 (allow) [] to list loopback.auto
+2026-01-13 17:38:23.314556 100.00% [NOTICE] switch_utils.c:665 Adding ::1/128 (allow) [] to list loopback.auto
+2026-01-13 17:38:23.314558 100.00% [NOTICE] switch_core.c:1563 Created ip list localnet.auto default (deny)
+2026-01-13 17:38:23.314560 100.00% [NOTICE] switch_core.c:1566 Adding 192.168.1.22/255.255.255.0 (allow) to list localnet.auto
+2026-01-13 17:38:23.314960 100.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:38:23.314980 100.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:38:23.315193 100.00% [DEBUG] mod_event_socket.c:2982 Socket up listening on 127.0.0.1:8021
+2026-01-13 17:38:23.315272 100.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:38:23.315289 100.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:38:23.315980 100.00% [ERR] mod_lua.cpp:202 /etc/fusionpbx/config.lua:69: attempt to concatenate a nil value (global 'scripts_dir')
+stack traceback:
+	/etc/fusionpbx/config.lua:69: in main chunk
+	[C]: in function 'dofile'
+	.../local/freeswitch/scripts/resources/functions/config.lua:20: in function 'load_config'
+	.../local/freeswitch/scripts/resources/functions/config.lua:26: in main chunk
+	[C]: in function 'require'
+	/usr/local/freeswitch/scripts/app.lua:28: in main chunk
+2026-01-13 17:38:23.315998 100.00% [ERR] mod_lua.cpp:269 LUA script parse/execute error!
+2026-01-13 17:38:23.316130 100.00% [INFO] switch_core.c:2503 
+FreeSWITCH Version 1.10.12-release+git~20240802T210227Z~a88d069d6f~64bit (git a88d069 2024-08-02 21:02:27Z 64bit)
+
+FreeSWITCH Started
+Max Sessions [1000]
+Session Rate [30]
+SQL [Enabled]

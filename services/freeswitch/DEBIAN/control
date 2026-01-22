@@ -1,0 +1,8 @@
+Package: tel4vn-freeswitch-local
+Version: 1.10.12-1
+Section: admin
+Priority: optional
+Architecture: amd64
+Maintainer: Tel4VN <admin@local>
+Depends: systemd, adduser, libtpl0,  libtiff6, libjpeg62-turbo, libodbc2, unixodbc, libspeex1, libspeexdsp1, libsofia-sip-ua0
+Description: FreeSWITCH runtime under /usr/local/freeswitch + systemd unit (offline install; bundles libtpl if needed)

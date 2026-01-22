@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+
+mkdir -p /var/log/freeswitch || true
+mkdir -p /usr/local/freeswitch/run || true
+
+chown -R www-data:www-data /usr/local/freeswitch /var/log/freeswitch 2>/dev/null || true
+find /usr/local/freeswitch -type d -exec chmod 2770 {} \; 2>/dev/null || true
+
+ldconfig >/dev/null 2>&1 || true
+
+systemctl daemon-reload || true
+systemctl unmask freeswitch.service || true
+systemctl enable freeswitch.service || true
+
+exit 0
