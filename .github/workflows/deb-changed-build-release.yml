@@ -142,26 +142,43 @@ jobs:
           path: out/deb/${{ matrix.service }}/*.deb
           if-no-files-found: error
 
-  release:
-    needs: [detect, build]
-    if: startsWith(github.ref, 'refs/tags/deb-v') && needs.detect.outputs.has_services == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download all deb artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: out/all-debs
+release:
+  needs: [detect, build]
+  if: startsWith(github.ref, 'refs/tags/deb-v') && needs.detect.outputs.has_services == 'true'
+  runs-on: ubuntu-latest
 
-      - name: Show debs
-        run: |
-          find out/all-debs -name "*.deb" -print
+  steps:
+    - uses: actions/checkout@v4
 
-      - name: Create Release + upload DEBs
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          TAG="${GITHUB_REF_NAME}"
-          gh release create "$TAG" --title "$TAG" --notes "DEB release for $TAG" || true
-          gh release upload "$TAG" out/all-debs/**/**/*.deb --clobber
+    - name: Download all deb artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: out/all-debs
+
+    - name: Show debs
+      shell: bash
+      run: |
+        set -euo pipefail
+        find out/all-debs -name "*.deb" -print
+
+    - name: Create Release + upload DEBs
+      shell: bash
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_REPO: ${{ github.repository }}
+      run: |
+        set -euo pipefail
+        TAG="${GITHUB_REF_NAME}"
+
+        # tạo release (nếu tồn tại thì bỏ qua)
+        gh release create "$TAG" --title "$TAG" --notes "DEB release for $TAG" --repo "$GH_REPO" || true
+
+        # lấy danh sách file deb và upload
+        mapfile -t DEBS < <(find out/all-debs -type f -name "*.deb")
+        if [[ ${#DEBS[@]} -eq 0 ]]; then
+          echo "[ERROR] No .deb found to upload"
+          exit 1
+        fi
+
+        gh release upload "$TAG" "${DEBS[@]}" --clobber --repo "$GH_REPO"
+
