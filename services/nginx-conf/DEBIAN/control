@@ -1,0 +1,8 @@
+Package: tel4vn-nginx-config
+Version: 1.0-1
+Section: web
+Priority: optional
+Architecture: amd64
+Depends: nginx
+Maintainer: tel4vn <devnull@local>
+Description: Nginx config for FusionPBX (config-only package)
