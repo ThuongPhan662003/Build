@@ -1,15 +1,34 @@
 #!/usr/bin/env bash
 set -euo pipefail
-#
-# ====== [SỬA 1] Chuẩn hoá service name + repo_root + OUTDIR theo CI ======
-SERVICE="postgresql-conf"   # phải khớp tên thư mục service & workflow matrix.service
+
+# =========================
+# [SỬA 1] Đặt tên service đúng để CI upload đúng thư mục:
+# workflow đang tìm: out/deb/postgresql-conf/*.deb
+# =========================
+SERVICE="postgresql-conf"
+
+# =========================
+# [SỬA 2] Lấy repo_root ổn định (CI/local), KHÔNG dùng $PWD
+# - Nếu repo là git: dùng git rev-parse
+# - Nếu không: fallback theo cấu trúc services/<service>/build.sh => ../..
+# =========================
 svc_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-repo_root="$(cd "$svc_dir/../.." && pwd)"
-OUTDIR="${repo_root}/out/deb/${SERVICE}"
+repo_root="$(git -C "$svc_dir" rev-parse --show-toplevel 2>/dev/null || true)"
+if [[ -z "${repo_root}" ]]; then
+  repo_root="$(cd "$svc_dir/../.." && pwd)"
+fi
 
 PKG="tel4vn-postgresql12-config"
 VER="${1:-1.0-1}"
 ARCH="$(dpkg --print-architecture)"
+
+# =========================
+# [SỬA 3] OUTDIR khớp workflow upload: out/deb/<service>/
+# =========================
+OUTDIR="${repo_root}/out/deb/${SERVICE}"
+
+# Kiểm tra tool bắt buộc
+command -v dpkg-deb >/dev/null 2>&1 || { echo "[ERROR] dpkg-deb not found"; exit 1; }
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -56,11 +75,7 @@ ROLE_PASSWORD="Tel4vn.com##2023"
 ROLE_FUSIONPBX_PASSWORD=""
 ROLE_FREESWITCH_PASSWORD=""
 
-# Only patch this exact line in pg_hba.conf:
-# host all all 127.0.0.1/32 <METHOD>   -> trust
 PATCH_PG_HBA_IPV4_TRUST="1"
-
-# Backup then remove FusionPBX config if you want
 REMOVE_FUSIONPBX_CONFIG="1"
 EOF
 chmod 0644 "$WORK/etc/tel4vn/postgresql12.env"
@@ -103,11 +118,9 @@ mkdir -p /var/lib/tel4vn || true
 touch "$LOG" 2>/dev/null || true
 
 log() { echo "[$(date -Is)] $*" | tee -a "$LOG" >/dev/null; }
-
 sql_escape() { local s="${1//\'/\'\'}"; printf "%s" "$s"; }
 valid_ident() { [[ "$1" =~ ^[A-Za-z0-9_]+$ ]]; }
 
-# TCP to avoid socket timing issues
 psql_pg() { sudo -u postgres psql -h 127.0.0.1 -p 5432 -v ON_ERROR_STOP=1 -qAtc "$1"; }
 
 wait_ready() {
@@ -280,7 +293,11 @@ chmod 0755 "$WORK/DEBIAN/postrm"
 # ----------------------------
 # Build deb
 # ----------------------------
-# ====== [SỬA 2] build ra đúng OUTDIR theo convention out/deb/<service> ======
 DEB_PATH="${OUTDIR}/${PKG}_${VER}_${ARCH}.deb"
 dpkg-deb --build "$WORK" "$DEB_PATH"
-echo "OK: $DEB_PATH"
+
+# =========================
+# [SỬA 4] In debug để bạn chắc chắn thấy file đã tạo
+# =========================
+echo "[OK] $DEB_PATH"
+ls -lah "$OUTDIR"
