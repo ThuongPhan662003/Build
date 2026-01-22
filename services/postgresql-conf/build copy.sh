@@ -1,18 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ====== [SỬA 1] Chuẩn hoá service name + repo_root + OUTDIR theo CI ======
-SERVICE="postgresql-conf"   # phải khớp tên thư mục service & workflow matrix.service
-svc_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-repo_root="$(cd "$svc_dir/../.." && pwd)"
-OUTDIR="${repo_root}/out/deb/${SERVICE}"
-
 PKG="tel4vn-postgresql12-config"
 VER="${1:-1.0-1}"
 ARCH="$(dpkg --print-architecture)"
-
+OUTDIR="${PWD}/out"
 WORK="$(mktemp -d)"
-trap 'rm -rf "$WORK"' EXIT
 
 mkdir -p "$OUTDIR" \
   "$WORK/DEBIAN" \
@@ -20,6 +13,8 @@ mkdir -p "$OUTDIR" \
   "$WORK/etc/tel4vn" \
   "$WORK/etc/systemd/system" \
   "$WORK/var/lib/tel4vn"
+
+trap 'rm -rf "$WORK"' EXIT
 
 # ----------------------------
 # control
@@ -140,16 +135,20 @@ patch_pg_hba_ipv4_trust() {
 
   cp -a "$PG_HBA" "${PG_HBA}.bak.$(date +%F_%H%M%S)" || true
 
+  # Replace ONLY the method on the 127.0.0.1/32 line:
+  # host all all 127.0.0.1/32 <anything>  -> trust
   if grep -qE '^[[:space:]]*host[[:space:]]+all[[:space:]]+all[[:space:]]+127\.0\.0\.1/32[[:space:]]+' "$PG_HBA"; then
     sed -i -E \
       's@^([[:space:]]*host[[:space:]]+all[[:space:]]+all[[:space:]]+127\.0\.0\.1/32[[:space:]]+).*$@\1trust@' \
       "$PG_HBA"
     log "[INFO] patched method to trust for 127.0.0.1/32 in $PG_HBA"
   else
+    # If the line doesn't exist, append it (still only affects that one rule)
     echo 'host    all             all             127.0.0.1/32            trust' >> "$PG_HBA"
     log "[INFO] appended trust line for 127.0.0.1/32 to $PG_HBA"
   fi
 
+  # reload/restart to apply
   if command -v pg_ctlcluster >/dev/null 2>&1; then
     pg_ctlcluster "$PGVER" "$CLUSTER" reload >/dev/null 2>&1 || pg_ctlcluster "$PGVER" "$CLUSTER" restart >/dev/null 2>&1 || true
   else
@@ -240,14 +239,25 @@ main() {
   fi
 
   log "[INFO] start setup (PGVER=${PGVER}, CLUSTER=${CLUSTER})"
+
+  # Ensure DB is up first (so later SQL works)
   wait_ready
+
+  # Patch ONLY the 127.0.0.1/32 method to trust
   patch_pg_hba_ipv4_trust
+
+  # Ensure ready again (in case reload/restart happened)
   wait_ready
+
+  # Create DB/roles
   create_db_roles
+
+  # Optional remove FusionPBX config
   remove_fusionpbx_config
 
   touch "$DONE_FLAG"
   systemctl disable --now tel4vn-postgresql12-setup.service >/dev/null 2>&1 || true
+
   log "[INFO] done"
 }
 
@@ -263,6 +273,7 @@ cat > "$WORK/DEBIAN/postinst" <<'EOF'
 set -e
 systemctl daemon-reload >/dev/null 2>&1 || true
 systemctl enable tel4vn-postgresql12-setup.service >/dev/null 2>&1 || true
+# Try start now (non-blocking-ish; service has retry)
 systemctl start tel4vn-postgresql12-setup.service >/dev/null 2>&1 || true
 exit 0
 EOF
@@ -280,7 +291,5 @@ chmod 0755 "$WORK/DEBIAN/postrm"
 # ----------------------------
 # Build deb
 # ----------------------------
-# ====== [SỬA 2] build ra đúng OUTDIR theo convention out/deb/<service> ======
-DEB_PATH="${OUTDIR}/${PKG}_${VER}_${ARCH}.deb"
-dpkg-deb --build "$WORK" "$DEB_PATH"
-echo "OK: $DEB_PATH"
+dpkg-deb --build "$WORK" "$OUTDIR/${PKG}_${VER}_${ARCH}.deb"
+echo "OK: $OUTDIR/${PKG}_${VER}_${ARCH}.deb"
