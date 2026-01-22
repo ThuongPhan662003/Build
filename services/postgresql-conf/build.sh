@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
+##
 PKG="tel4vn-postgresql12-config"
 VER="${1:-1.0-1}"
 ARCH="$(dpkg --print-architecture)"
