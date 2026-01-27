@@ -1,100 +1,62 @@
-name: Build ISO with simple-cdd (download release debs + local-packages)
+- name: Build ISO with simple-cdd (debug on failure)
+  shell: bash
+  run: |
+    set -euo pipefail
+    cd "$GITHUB_WORKSPACE"
 
-on:
-  workflow_dispatch: {}
+    LOCAL_PKGS="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
+    echo "Using local packages dir: $LOCAL_PKGS"
+    test -d "$LOCAL_PKGS"
+    test -f simple-cdd.conf
 
-permissions:
-  contents: read
+    # In ra version/help để biết build-simple-cdd có hỗ trợ --local-packages không
+    echo "=== build-simple-cdd --version ==="
+    build-simple-cdd --version || true
+    echo "=== build-simple-cdd --help (first 120 lines) ==="
+    build-simple-cdd --help | head -n 120 || true
 
-jobs:
-  build_iso:
-    runs-on: ubuntu-latest
-    container:
-      image: debian:bookworm
+    # Nếu không hỗ trợ --local-packages, dùng symlink cách cổ điển để simple-cdd tự pick
+    mkdir -p extras
+    ln -sfn ../build-iso/extras/local-packages extras/local-packages
 
-    steps:
-      - name: Install tools (simple-cdd + curl + jq)
-        run: |
-          set -e
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y \
-            ca-certificates curl jq gnupg \
-            simple-cdd debian-cd xorriso genisoimage isolinux syslinux-common
+    set +e
+    # Thử build có --local-packages trước (nếu tool hỗ trợ)
+    build-simple-cdd \
+      --conf "$GITHUB_WORKSPACE/simple-cdd.conf" \
+      --dist bookworm \
+      --force-root \
+      --verbose \
+      --local-packages "$LOCAL_PKGS" \
+      --logfile "$GITHUB_WORKSPACE/build-simple-cdd.log"
+    rc=$?
 
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    if [ $rc -ne 0 ]; then
+      echo "build-simple-cdd failed with code=$rc"
+      echo "==== tail build-simple-cdd.log ===="
+      tail -n 200 "$GITHUB_WORKSPACE/build-simple-cdd.log" || true
+      echo "==== list tmp/ ===="
+      ls -la "$GITHUB_WORKSPACE/tmp" || true
+      echo "==== tail any tmp logs ===="
+      find "$GITHUB_WORKSPACE/tmp" -maxdepth 2 -type f -name "*.log" -print -exec tail -n 80 {} \; || true
 
-      - name: Download release assets into build-iso/extras/local-packages
-        env:
-          GH_REPO: ThuongPhan662003/Build
-          GH_TAG: deb-v0.0.1
-          TOKEN: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
-        run: |
-          set -e
-          cd "$GITHUB_WORKSPACE"
+      echo "Retry WITHOUT --local-packages (using extras/local-packages symlink)..."
+      build-simple-cdd \
+        --conf "$GITHUB_WORKSPACE/simple-cdd.conf" \
+        --dist bookworm \
+        --force-root \
+        --verbose \
+        --logfile "$GITHUB_WORKSPACE/build-simple-cdd.log"
+      rc2=$?
 
-          OUT_DIR="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
-          mkdir -p "$OUT_DIR"
+      if [ $rc2 -ne 0 ]; then
+        echo "Retry also failed with code=$rc2"
+        echo "==== tail build-simple-cdd.log (retry) ===="
+        tail -n 200 "$GITHUB_WORKSPACE/build-simple-cdd.log" || true
+        exit $rc2
+      fi
+    fi
 
-          echo "Fetching release info: $GH_REPO tag=$GH_TAG"
-          release_json="$(curl -fsSL \
-            -H "Authorization: Bearer $TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${GH_REPO}/releases/tags/${GH_TAG}")"
-
-          assets="$(echo "$release_json" | jq -r '.assets[] | "\(.id) \(.name)"')"
-
-          if [ -z "$assets" ]; then
-            echo "No assets found or token has no access."
-            echo "$release_json" | jq -r '.message? // empty'
-            exit 1
-          fi
-
-          echo "Downloading assets to $OUT_DIR ..."
-          echo "$assets" | while read -r id name; do
-            [ -z "$id" ] && continue
-            echo " - id=$id name=$name"
-            curl -fL \
-              -H "Authorization: Bearer $TOKEN" \
-              -H "Accept: application/octet-stream" \
-              "https://api.github.com/repos/${GH_REPO}/releases/assets/${id}" \
-              -o "$OUT_DIR/$name"
-          done
-
-          echo "Local-packages after download:"
-          ls -lh "$OUT_DIR" | head -n 200
-          echo "Deb count:"
-          find "$OUT_DIR" -maxdepth 1 -type f -name "*.deb" | wc -l
-
-      - name: Build ISO with simple-cdd (use --local-packages)
-        run: |
-          set -e
-          cd "$GITHUB_WORKSPACE"
-
-          LOCAL_PKGS="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
-
-          echo "Using local packages dir: $LOCAL_PKGS"
-          test -d "$LOCAL_PKGS"
-          test -f simple-cdd.conf
-
-          build-simple-cdd \
-            --conf "$GITHUB_WORKSPACE/simple-cdd.conf" \
-            --dist bookworm \
-            --force-root \
-            --verbose \
-            --local-packages "$LOCAL_PKGS" \
-            --logfile "$GITHUB_WORKSPACE/build-simple-cdd.log"
-
-          echo "ISO outputs:"
-          ls -la images || true
-          find images -maxdepth 1 -type f -name "*.iso" -print || true
-
-      - name: Upload ISO + logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: iso-output
-          if-no-files-found: error
-          path: |
-            images/*.iso
-            build-simple-cdd.log
-            simple-cdd.conf
+    set -e
+    echo "ISO outputs:"
+    ls -la images || true
+    find images -maxdepth 1 -type f -name "*.iso" -print || true
