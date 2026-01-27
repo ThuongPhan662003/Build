@@ -1,4 +1,4 @@
-name: Build ISO with simple-cdd (release debs + local packages)
+name: Build ISO with simple-cdd (download release debs + print errors)
 
 on:
   workflow_dispatch: {}
@@ -24,25 +24,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Prepare local-packages folder + symlink extras/local-packages
+      - name: Prepare local-packages folder + symlink
         shell: bash
         run: |
           set -euo pipefail
           cd "$GITHUB_WORKSPACE"
 
+          # Folder bạn muốn chứa deb
           mkdir -p build-iso/extras/local-packages
+
+          # Symlink để simple-cdd dễ pick theo cơ chế "extras/local-packages"
           mkdir -p extras
           ln -sfn ../build-iso/extras/local-packages extras/local-packages
 
-          echo "Workspace: $GITHUB_WORKSPACE"
-          echo "Tree (top):"
+          echo "=== Root ==="
           ls -la
-          echo "Check local-packages:"
+          echo "=== build-iso/extras ==="
           ls -la build-iso/extras || true
+          echo "=== build-iso/extras/local-packages ==="
           ls -la build-iso/extras/local-packages || true
+          echo "=== extras/local-packages (symlink) ==="
           ls -la extras/local-packages || true
 
-      - name: Download private release assets into build-iso/extras/local-packages
+      - name: Download release assets into build-iso/extras/local-packages
         shell: bash
         env:
           GH_REPO: ThuongPhan662003/Build
@@ -61,10 +65,11 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${GH_REPO}/releases/tags/${GH_TAG}")"
 
+          # asset id + name
           assets="$(echo "$release_json" | jq -r '.assets[] | "\(.id) \(.name)"')"
 
           if [ -z "$assets" ]; then
-            echo "No assets found or token has no access to private release."
+            echo "No assets found or token has no access."
             echo "$release_json" | jq -r '.message? // empty'
             exit 1
           fi
@@ -72,7 +77,7 @@ jobs:
           echo "Assets:"
           echo "$assets"
 
-          echo "Downloading assets to $OUT_DIR ..."
+          echo "Downloading to $OUT_DIR ..."
           echo "$assets" | while read -r id name; do
             [ -z "${id:-}" ] && continue
             echo " - id=$id name=$name"
@@ -88,58 +93,47 @@ jobs:
           echo "Deb count:"
           find "$OUT_DIR" -maxdepth 1 -type f -name "*.deb" | wc -l
 
-      - name: Build ISO with simple-cdd (auto fallback if --local-packages unsupported)
+      - name: Build ISO with simple-cdd (print exact error)
         shell: bash
         run: |
           set -euo pipefail
+          set -x
           cd "$GITHUB_WORKSPACE"
 
           LOCAL_PKGS="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
+          CONF="$GITHUB_WORKSPACE/simple-cdd.conf"
+          LOG="$GITHUB_WORKSPACE/build-simple-cdd.log"
+
+          trap 'rc=$?; echo "FAILED at line $LINENO: $BASH_COMMAND (exit=$rc)"; \
+                echo "=== PWD ==="; pwd; \
+                echo "=== ls -la (root) ==="; ls -la; \
+                echo "=== ls -la build-iso/extras ==="; ls -la build-iso/extras || true; \
+                echo "=== ls -la local-packages ==="; ls -la "$LOCAL_PKGS" || true; \
+                echo "=== find simple-cdd.conf ==="; find . -maxdepth 3 -name "simple-cdd.conf" -print || true; \
+                echo "=== tail build-simple-cdd.log ==="; tail -n 200 "$LOG" 2>/dev/null || echo "(no build-simple-cdd.log)"; \
+                echo "=== tmp logs ==="; ls -la tmp 2>/dev/null || true; \
+                find tmp -maxdepth 2 -type f -name "*.log" -print -exec tail -n 120 {} \; 2>/dev/null || true; \
+                exit $rc' ERR
+
           echo "Using local packages dir: $LOCAL_PKGS"
-          test -d "$LOCAL_PKGS"
-          test -f simple-cdd.conf
+          mkdir -p "$LOCAL_PKGS"
+          test -f "$CONF"
 
-          echo "=== build-simple-cdd --help (first 120 lines) ==="
-          build-simple-cdd --help | head -n 120 || true
-
-          # Đảm bảo symlink tồn tại để simple-cdd tìm theo cách mặc định
+          # Symlink để simple-cdd pick theo kiểu mặc định
           mkdir -p extras
           ln -sfn ../build-iso/extras/local-packages extras/local-packages
 
-          # Thử build có --local-packages trước
-          set +e
+          echo "=== build-simple-cdd --help (first 80 lines) ==="
+          build-simple-cdd --help | head -n 80 || true
+
+          # Thử build có --local-packages (nếu tool không hỗ trợ, lỗi sẽ được in ra cụ thể)
           build-simple-cdd \
-            --conf "$GITHUB_WORKSPACE/simple-cdd.conf" \
+            --conf "$CONF" \
             --dist bookworm \
             --force-root \
+            --verbose \
             --local-packages "$LOCAL_PKGS" \
-            --logfile "$GITHUB_WORKSPACE/build-simple-cdd.log"
-          rc=$?
-
-          if [ $rc -ne 0 ]; then
-            echo "build-simple-cdd failed (code=$rc). Show log + retry without --local-packages..."
-            echo "==== tail build-simple-cdd.log ===="
-            tail -n 200 "$GITHUB_WORKSPACE/build-simple-cdd.log" || true
-
-            echo "Retry WITHOUT --local-packages (using extras/local-packages symlink)..."
-            build-simple-cdd \
-              --conf "$GITHUB_WORKSPACE/simple-cdd.conf" \
-              --dist bookworm \
-              --force-root \
-              --verbose \
-              --logfile "$GITHUB_WORKSPACE/build-simple-cdd.log"
-            rc2=$?
-
-            if [ $rc2 -ne 0 ]; then
-              echo "Retry failed too (code=$rc2)."
-              echo "==== tail build-simple-cdd.log (retry) ===="
-              tail -n 200 "$GITHUB_WORKSPACE/build-simple-cdd.log" || true
-              echo "==== list tmp/ (if exists) ===="
-              ls -la "$GITHUB_WORKSPACE/tmp" || true
-              exit $rc2
-            fi
-          fi
-          set -e
+            --logfile "$LOG"
 
           echo "ISO outputs:"
           ls -la images || true
