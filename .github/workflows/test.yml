@@ -1,0 +1,142 @@
+name: Download .deb from Release + Build ISO (build-simple-cdd)
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "GitHub Release tag (vd: deb-v0.0.1)"
+        required: true
+        default: "deb-v0.0.1"
+      debian_suite:
+        description: "Debian suite (vd: bookworm, bullseye)"
+        required: true
+        default: "bookworm"
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    env:
+      LOCAL_DEB_DIR: build-iso/extras/local-packages
+      CONF_PATH: build-iso/simple-cdd.conf
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            ca-certificates curl jq grep sed \
+            gnupg gpgv debian-archive-keyring \
+            simple-cdd python3-simple-cdd \
+            xorriso isolinux syslinux-common mtools \
+            debian-cd reprepro
+
+      - name: Download .deb assets from GitHub Release (public, no token)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${LOCAL_DEB_DIR}"
+
+          OWNER_REPO="${GITHUB_REPOSITORY}"
+          TAG="${{ inputs.release_tag }}"
+          API="https://api.github.com/repos/${OWNER_REPO}/releases/tags/${TAG}"
+
+          echo "Release API: $API"
+          release_json="$(curl -fsSL -H "Accept: application/vnd.github+json" "$API")"
+
+          mapfile -t urls < <(
+            echo "$release_json" \
+              | jq -r '.assets[] | select(.name | endswith(".deb")) | .browser_download_url'
+          )
+
+          if [ "${#urls[@]}" -eq 0 ]; then
+            echo "ERROR: Release tag ${TAG} has no .deb assets."
+            exit 1
+          fi
+
+          echo "Found ${#urls[@]} .deb files. Downloading..."
+          for u in "${urls[@]}"; do
+            echo "-> $u"
+            curl -fL --retry 5 --retry-delay 2 -o "${LOCAL_DEB_DIR}/$(basename "$u")" "$u"
+          done
+
+          echo "Downloaded:"
+          ls -lh "${LOCAL_DEB_DIR}"
+
+      - name: Patch simple-cdd.conf to Debian mirror/suite (avoid 404)
+        shell: bash
+        run: |
+          set -euo pipefail
+          CONF="$GITHUB_WORKSPACE/${CONF_PATH}"
+          SUITE="${{ inputs.debian_suite }}"
+
+          if [ ! -f "$CONF" ]; then
+            echo "ERROR: Missing $CONF"
+            exit 1
+          fi
+
+          set_kv() {
+            local key="$1"
+            local val="$2"
+            if grep -qE "^${key}=" "$CONF"; then
+              sed -i "s|^${key}=.*|${key}=${val}|" "$CONF"
+            else
+              echo "${key}=${val}" >> "$CONF"
+            fi
+          }
+
+          set_kv "mirror" "https://deb.debian.org/debian"
+          set_kv "debian_mirror" "https://deb.debian.org/debian"
+          set_kv "security_mirror" "https://deb.debian.org/debian-security"
+          set_kv "suite" "$SUITE"
+          set_kv "arch" "amd64"
+          set_kv "mirror_components" "main contrib non-free non-free-firmware"
+
+          echo "=== Patched config ==="
+          sed -n '1,200p' "$CONF"
+
+      - name: Build ISO (ONLY build-simple-cdd)
+        shell: bash
+        env:
+          GNUPGHOME: ${{ github.workspace }}/.gnupg-ci
+        run: |
+          set -euo pipefail
+          mkdir -p "$GNUPGHOME"
+          chmod 700 "$GNUPGHOME"
+
+          # IMPORTANT: build-simple-cdd must NOT run as root
+          # On GitHub runner, default user is "runner" -> OK
+
+          build-simple-cdd --conf "$GITHUB_WORKSPACE/${CONF_PATH}" 2>&1 | tee "$GITHUB_WORKSPACE/build-simple-cdd.log"
+
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          ISO_PATH="$(find "$GITHUB_WORKSPACE" -type f -name "*.iso" | head -n 1 || true)"
+          if [ -z "$ISO_PATH" ]; then
+            echo "ERROR: No ISO produced. Check build-simple-cdd.log"
+            exit 1
+          fi
+          cp -v "$ISO_PATH" "$GITHUB_WORKSPACE/out/"
+          ls -lh "$GITHUB_WORKSPACE/out"
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iso-output
+          path: out/*.iso
+
+      - name: Upload debs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-assets
+          path: ${{ env.LOCAL_DEB_DIR }}/*.deb
+
+      - name: Upload build log artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build-simple-cdd.log
