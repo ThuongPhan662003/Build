@@ -1,79 +1,65 @@
-name: Download Release .deb to local-packages
+name: Download .deb from Release to local-packages
 
 on:
   workflow_dispatch:
     inputs:
-      tag:
-        description: "Release tag (ví dụ: deb-v0.0.1). Để trống = lấy latest release"
-        required: false
-        default: ""
+      release_tag:
+        description: "Release tag to download (e.g., deb-v0.0.1)"
+        required: true
+        default: "deb-v0.0.1"
 
 jobs:
   download:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
 
     steps:
-      - name: Checkout (optional)
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Install tools
-        shell: bash
         run: |
-          set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends curl jq
+          sudo apt-get install -y curl jq
 
-      - name: Download .deb assets from Release
+      - name: Download .deb assets from release tag into build-iso/extras/local-packages
         shell: bash
-        env:
-          OWNER: ThuongPhan662003
-          REPO: Build
-          TAG: ${{ inputs.tag }}
-          # Dùng GITHUB_TOKEN mặc định (không cần PAT riêng)
-          GH_TOKEN: ${{ github.token }}
-          OUT_DIR: ${{ github.workspace }}/build-iso/extras/local-packages
         run: |
           set -euo pipefail
+
+          TAG="${{ inputs.release_tag }}"
+          OWNER_REPO="${GITHUB_REPOSITORY}"   # e.g. ThuongPhan662003/Build
+          OUT_DIR="build-iso/extras/local-packages"
+
           mkdir -p "$OUT_DIR"
+          echo "Downloading .deb assets from tag: $TAG"
+          echo "Output dir: $OUT_DIR"
 
-          if [ -n "${TAG}" ]; then
-            api="https://api.github.com/repos/${OWNER}/${REPO}/releases/tags/${TAG}"
-            echo "Fetching release by tag: ${TAG}"
-          else
-            api="https://api.github.com/repos/${OWNER}/${REPO}/releases/latest"
-            echo "Fetching latest release"
-          fi
+          API="https://api.github.com/repos/${OWNER_REPO}/releases/tags/${TAG}"
 
-          release_json="$(curl -fsSL \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "$api")"
+          # Lấy danh sách link download của assets .deb
+          mapfile -t URLS < <(
+            curl -fsSL -H "Accept: application/vnd.github+json" "$API" \
+            | jq -r '.assets[] | select(.name|endswith(".deb")) | .browser_download_url'
+          )
 
-          echo "Release: $(echo "$release_json" | jq -r '.name // .tag_name')"
-
-          mapfile -t urls < <(echo "$release_json" | jq -r '.assets[] | select(.name | endswith(".deb")) | .browser_download_url')
-
-          if [ "${#urls[@]}" -eq 0 ]; then
-            echo "No .deb assets found in this release."
+          if [ "${#URLS[@]}" -eq 0 ]; then
+            echo "No .deb assets found in release tag $TAG"
             exit 1
           fi
 
-          echo "Found ${#urls[@]} .deb files. Downloading to: $OUT_DIR"
-          for u in "${urls[@]}"; do
-            fname="$(basename "$u")"
+          for url in "${URLS[@]}"; do
+            fname="$(basename "$url")"
             echo "-> $fname"
-            curl -fL --retry 5 --retry-delay 2 -o "$OUT_DIR/$fname" "$u"
+            curl -fL --retry 5 --retry-delay 2 -o "$OUT_DIR/$fname" "$url"
           done
 
-          echo "Downloaded files:"
-          ls -lh "$OUT_DIR"
+          echo "Done. Files in $OUT_DIR:"
+          ls -lah "$OUT_DIR"
 
-      - name: Upload local-packages as artifact
+      - name: Upload downloaded folder as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: local-packages
-          path: build-iso/extras/local-packages/*.deb
-          if-no-files-found: error
+          name: local-packages-${{ inputs.release_tag }}
+          path: build-iso/extras/local-packages
