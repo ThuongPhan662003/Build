@@ -3,6 +3,11 @@ name: Build ISO (simple-cdd, non-root)
 on:
   workflow_dispatch:
 
+env:
+  # bật debug log chi tiết
+  ACTIONS_STEP_DEBUG: "true"
+  ACTIONS_RUNNER_DEBUG: "true"
+
 jobs:
   build_iso:
     runs-on: ubuntu-latest
@@ -13,103 +18,113 @@ jobs:
         shell: bash
 
     steps:
-      - name: Checkout repo (with LFS)
+      # 1) Checkout bình thường (KHÔNG bật lfs ở đây để tránh fail ngay)
+      - name: Checkout repo (no LFS at checkout)
         uses: actions/checkout@v4
         with:
           submodules: false
-          lfs: true
+          fetch-depth: 0
 
-      # Bạn nói "đã làm bước 1 rồi" => mình không lặp lại step tải deb.
-      # Mình chỉ đảm bảo action lấy được file LFS thật, không phải pointer.
-
-      - name: Install required tools (git-lfs + deps for debug/build)
+      # 2) Cài tool cần thiết để kéo LFS và debug
+      - name: Install required tools (git + git-lfs + debug utils)
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           apt-get update
           apt-get install -y --no-install-recommends \
-            simple-cdd git-lfs ca-certificates coreutils findutils sed gawk
+            git git-lfs ca-certificates \
+            coreutils findutils sed gawk
 
-          git lfs version || true
+          git --version
+          git lfs version
 
-      - name: Ensure LFS objects are present (force pull)
+      # 3) Kéo LFS objects thật về (đây là bước quyết định)
+      - name: Pull Git LFS objects
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           git lfs install --local
+          git lfs env || true
+          git lfs ls-files || true
           git lfs pull
 
-      - name: Diagnose local-packages (fail fast if LFS pointer)
+      # 4) Kiểm tra local-packages có còn pointer không + in log rõ ràng
+      - name: Diagnose local-packages (show errors clearly)
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           DIR="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
           echo "DIR=$DIR"
-          ls -lah "$DIR" | sed -n '1,120p'
+          ls -lah "$DIR" | sed -n '1,80p'
 
-          echo
           echo "=== Check for LFS pointer files ==="
-          # nếu file bắt đầu bằng "version https://git-lfs.github.com/spec/v1" -> vẫn là pointer
           bad=0
           while IFS= read -r -d '' f; do
             head1="$(head -n 1 "$f" || true)"
             if [[ "$head1" == "version https://git-lfs.github.com/spec/v1" ]]; then
               echo "LFS_POINTER: $(basename "$f")"
-              sed -n '1,3p' "$f" || true
+              echo "--- first 5 lines ---"
+              sed -n '1,5p' "$f" || true
+              echo "---------------------"
               bad=1
             fi
           done < <(find "$DIR" -maxdepth 1 -type f -name "*.deb" -print0)
 
           if [ "$bad" -ne 0 ]; then
-            echo
-            echo "ERROR: local-packages contains Git LFS pointer files, not real .deb binaries."
-            echo "Fix: ensure LFS objects are pushed and pulled. (git lfs ls-files; git lfs pull)"
+            echo "ERROR: Found LFS pointer files in local-packages. LFS pull didn't fetch real binaries."
             exit 1
           fi
 
-          echo
           echo "=== Check .deb ar header '!<arch>' ==="
           bad2=0
           for f in "$DIR"/*.deb; do
             sig="$(head -c 7 "$f" || true)"
             if [ "$sig" != "!<arch>" ]; then
               echo "BAD_DEB: $(basename "$f") sig='$sig' size=$(stat -c%s "$f" || true)"
+              echo "--- first 20 lines ---"
+              sed -n '1,20p' "$f" || true
+              echo "----------------------"
               bad2=1
             fi
           done
+
           if [ "$bad2" -ne 0 ]; then
-            echo "ERROR: Found invalid .deb (not ar archives)."
+            echo "ERROR: Some .deb files are not valid ar archives."
             exit 1
           fi
-          echo "OK: local-packages look valid."
+          echo "OK: local-packages are valid."
 
-      - name: Build ISO (non-root, using existing local-packages)
+      # 5) Cài simple-cdd (bạn nói đừng làm bước 1 tải deb; cái này chỉ cài tool build)
+      - name: Install simple-cdd
         run: |
-          set -euo pipefail
+          set -euxo pipefail
+          apt-get update
+          apt-get install -y --no-install-recommends simple-cdd
 
-          # tạo user build
+      # 6) Build non-root và tee log để bạn nhìn được lỗi
+      - name: Build ISO (non-root)
+        run: |
+          set -euxo pipefail
+
           useradd -m -s /bin/bash builder || true
           chown -R builder:builder "$GITHUB_WORKSPACE"
 
           CONF="$GITHUB_WORKSPACE/build-iso/simple-cdd.conf"
           LOCAL_PKGS="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
 
-          echo "CONF=$CONF"
-          echo "LOCAL_PKGS=$LOCAL_PKGS"
-
-          # chạy build bằng user builder
           su - builder -c "
-            set -euo pipefail
+            set -euxo pipefail
             build-simple-cdd --conf \"$CONF\" --dvd --local-packages \"$LOCAL_PKGS\" 2>&1 | tee \"$GITHUB_WORKSPACE/build-iso/build.log\"
           "
 
-      - name: Collect build logs (always)
+      # 7) Luôn in tail log khi fail để bạn thấy lỗi
+      - name: Show tail build log (always)
         if: always()
         run: |
-          set -euo pipefail
-          echo "=== Tail build log ==="
-          tail -n 200 "$GITHUB_WORKSPACE/build-iso/build.log" || true
-          echo "=== Find ISO files ==="
-          find "$GITHUB_WORKSPACE/build-iso" -maxdepth 4 -type f \( -name "*.iso" -o -name "*.log" \) -print || true
+          set -euxo pipefail
+          echo '=== Tail build.log ==='
+          tail -n 250 "$GITHUB_WORKSPACE/build-iso/build.log" || true
+          echo '=== ISO files ==='
+          find "$GITHUB_WORKSPACE/build-iso" -type f -name "*.iso" -print || true
 
-      - name: Upload ISO + logs
+      - name: Upload ISO + log
         if: always()
         uses: actions/upload-artifact@v4
         with:
