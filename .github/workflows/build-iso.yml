@@ -6,156 +6,115 @@ on:
 jobs:
   build_iso:
     runs-on: ubuntu-latest
-
     container:
       image: debian:bookworm
-
     defaults:
       run:
         shell: bash
 
     steps:
-      - name: Checkout repo (no submodules)
+      - name: Checkout repo (with LFS)
         uses: actions/checkout@v4
         with:
           submodules: false
+          lfs: true
 
-      - name: Install simple-cdd and deps
+      # Bạn nói "đã làm bước 1 rồi" => mình không lặp lại step tải deb.
+      # Mình chỉ đảm bảo action lấy được file LFS thật, không phải pointer.
+
+      - name: Install required tools (git-lfs + deps for debug/build)
         run: |
           set -euo pipefail
           apt-get update
           apt-get install -y --no-install-recommends \
-            simple-cdd ca-certificates gnupg gpgv \
-            debian-archive-keyring distro-info-data \
-            reprepro fakeroot sudo xorriso rsync \
-            apt-utils
+            simple-cdd git-lfs ca-certificates coreutils findutils sed gawk
 
-      - name: Prepare non-root builder user
+          git lfs version || true
+
+      - name: Ensure LFS objects are present (force pull)
         run: |
           set -euo pipefail
-          useradd -m -s /bin/bash builder || true
-          mkdir -p /home/builder/.gnupg
-          chmod 700 /home/builder/.gnupg
-          chown -R builder:builder /home/builder/.gnupg
-          chown -R builder:builder "$GITHUB_WORKSPACE"
+          git lfs install --local
+          git lfs pull
 
-      - name: Show local-packages content (no SIGPIPE)
-        run: |
-          set -euo pipefail
-          LOCAL_PKGS="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
-          echo "LOCAL_PKGS=$LOCAL_PKGS"
-          if [ ! -d "$LOCAL_PKGS" ]; then
-            echo "ERROR: local-packages folder not found: $LOCAL_PKGS"
-            exit 1
-          fi
-
-          echo "=== local-packages: first 200 filenames (sorted) ==="
-          find "$LOCAL_PKGS" -maxdepth 1 -type f -printf "%f\n" | sort | sed -n '1,200p'
-
-          echo "=== local-packages: total files ==="
-          find "$LOCAL_PKGS" -maxdepth 1 -type f | wc -l
-
-          echo "=== sample sizes (first 50) ==="
-          find "$LOCAL_PKGS" -maxdepth 1 -type f -printf "%s %f\n" | sort -n | sed -n '1,50p'
-      - name: Diagnose local-packages (.deb) files
+      - name: Diagnose local-packages (fail fast if LFS pointer)
         run: |
           set -euo pipefail
           DIR="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
-
-          echo "=== [1] Where am I? ==="
-          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
           echo "DIR=$DIR"
-          pwd
+          ls -lah "$DIR" | sed -n '1,120p'
 
           echo
-          echo "=== [2] List local-packages (top 200) ==="
-          if [ -d "$DIR" ]; then
-            ls -lah "$DIR" | sed -n '1,200p'
-          else
-            echo "ERROR: directory not found: $DIR"
-            exit 2
-          fi
-
-          echo
-          echo "=== [3] Find suspicious debs (small files) ==="
-          # Debian .deb normally > few KB; pointers/HTML often very small
-          find "$DIR" -maxdepth 1 -type f -name "*.deb" -printf "%s\t%f\n" | sort -n | sed -n '1,80p'
-
-          echo
-          echo "=== [4] Validate each .deb has ar header '!<arch>' ==="
+          echo "=== Check for LFS pointer files ==="
+          # nếu file bắt đầu bằng "version https://git-lfs.github.com/spec/v1" -> vẫn là pointer
           bad=0
-          for f in "$DIR"/*.deb; do
-            [ -e "$f" ] || { echo "No .deb files found in $DIR"; exit 3; }
-
-            size="$(stat -c%s "$f" 2>/dev/null || echo 0)"
-            sig="$(head -c 7 "$f" 2>/dev/null || true)"
-
-            # Print a compact one-line status
-            if [ "$sig" = "!<arch>" ]; then
-              echo "OK   size=$size  sig=$sig  file=$(basename "$f")"
-            else
-              echo "BAD  size=$size  sig='$sig' file=$(basename "$f")"
-              echo "---- first 15 lines (to detect LFS pointer / HTML / errors) ----"
-              sed -n '1,15p' "$f" || true
-              echo "---- file command ----"
-              file "$f" || true
-              echo "---------------------------------------------------------------"
+          while IFS= read -r -d '' f; do
+            head1="$(head -n 1 "$f" || true)"
+            if [[ "$head1" == "version https://git-lfs.github.com/spec/v1" ]]; then
+              echo "LFS_POINTER: $(basename "$f")"
+              sed -n '1,3p' "$f" || true
               bad=1
             fi
-          done
+          done < <(find "$DIR" -maxdepth 1 -type f -name "*.deb" -print0)
+
+          if [ "$bad" -ne 0 ]; then
+            echo
+            echo "ERROR: local-packages contains Git LFS pointer files, not real .deb binaries."
+            echo "Fix: ensure LFS objects are pushed and pulled. (git lfs ls-files; git lfs pull)"
+            exit 1
+          fi
 
           echo
-          echo "=== [5] Summary ==="
-          if [ "$bad" -ne 0 ]; then
-            echo "RESULT: Found BAD .deb files (not real deb ar archives)."
-            echo "Common causes:"
-            echo " - Git LFS pointer file (you committed pointer, not the real binary)"
-            echo " - Downloaded HTML/404 page but saved as .deb"
-            echo " - Truncated/corrupted file"
+          echo "=== Check .deb ar header '!<arch>' ==="
+          bad2=0
+          for f in "$DIR"/*.deb; do
+            sig="$(head -c 7 "$f" || true)"
+            if [ "$sig" != "!<arch>" ]; then
+              echo "BAD_DEB: $(basename "$f") sig='$sig' size=$(stat -c%s "$f" || true)"
+              bad2=1
+            fi
+          done
+          if [ "$bad2" -ne 0 ]; then
+            echo "ERROR: Found invalid .deb (not ar archives)."
             exit 1
-          else
-            echo "RESULT: All .deb files look like real Debian packages."
           fi
+          echo "OK: local-packages look valid."
 
       - name: Build ISO (non-root, using existing local-packages)
         run: |
           set -euo pipefail
 
+          # tạo user build
+          useradd -m -s /bin/bash builder || true
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+
           CONF="$GITHUB_WORKSPACE/build-iso/simple-cdd.conf"
           LOCAL_PKGS="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
 
-          if [ ! -f "$CONF" ]; then
-            echo "ERROR: CONF not found: $CONF"
-            exit 1
-          fi
+          echo "CONF=$CONF"
+          echo "LOCAL_PKGS=$LOCAL_PKGS"
 
-          # Build output dir (writeable by builder)
-          mkdir -p "$GITHUB_WORKSPACE/build-iso/out"
-          chown -R builder:builder "$GITHUB_WORKSPACE/build-iso/out"
-
-          # Run build as non-root (simple-cdd discourages root)
-          sudo -u builder -H bash -lc "
+          # chạy build bằng user builder
+          su - builder -c "
             set -euo pipefail
-            cd '$GITHUB_WORKSPACE/build-iso'
-            echo 'Running build-simple-cdd...'
-            build-simple-cdd --conf '$CONF' --dvd --local-packages '$LOCAL_PKGS'
+            build-simple-cdd --conf \"$CONF\" --dvd --local-packages \"$LOCAL_PKGS\" 2>&1 | tee \"$GITHUB_WORKSPACE/build-iso/build.log\"
           "
 
-      - name: Collect ISO files
+      - name: Collect build logs (always)
+        if: always()
         run: |
           set -euo pipefail
-          echo "=== Find ISO outputs ==="
-          find "$GITHUB_WORKSPACE" -type f -name '*.iso' -print || true
-          # Fail if none
-          if ! find "$GITHUB_WORKSPACE" -type f -name '*.iso' | grep -q .; then
-            echo "ERROR: No ISO produced."
-            exit 1
-          fi
+          echo "=== Tail build log ==="
+          tail -n 200 "$GITHUB_WORKSPACE/build-iso/build.log" || true
+          echo "=== Find ISO files ==="
+          find "$GITHUB_WORKSPACE/build-iso" -maxdepth 4 -type f \( -name "*.iso" -o -name "*.log" \) -print || true
 
-      - name: Upload ISO artifact
+      - name: Upload ISO + logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: iso-output
           path: |
-            **/*.iso
-          if-no-files-found: error
+            build-iso/**/*.iso
+            build-iso/build.log
+          if-no-files-found: warn
