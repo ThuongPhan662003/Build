@@ -57,6 +57,65 @@ jobs:
 
           echo "=== sample sizes (first 50) ==="
           find "$LOCAL_PKGS" -maxdepth 1 -type f -printf "%s %f\n" | sort -n | sed -n '1,50p'
+      - name: Diagnose local-packages (.deb) files
+        run: |
+          set -euo pipefail
+          DIR="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
+
+          echo "=== [1] Where am I? ==="
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+          echo "DIR=$DIR"
+          pwd
+
+          echo
+          echo "=== [2] List local-packages (top 200) ==="
+          if [ -d "$DIR" ]; then
+            ls -lah "$DIR" | sed -n '1,200p'
+          else
+            echo "ERROR: directory not found: $DIR"
+            exit 2
+          fi
+
+          echo
+          echo "=== [3] Find suspicious debs (small files) ==="
+          # Debian .deb normally > few KB; pointers/HTML often very small
+          find "$DIR" -maxdepth 1 -type f -name "*.deb" -printf "%s\t%f\n" | sort -n | sed -n '1,80p'
+
+          echo
+          echo "=== [4] Validate each .deb has ar header '!<arch>' ==="
+          bad=0
+          for f in "$DIR"/*.deb; do
+            [ -e "$f" ] || { echo "No .deb files found in $DIR"; exit 3; }
+
+            size="$(stat -c%s "$f" 2>/dev/null || echo 0)"
+            sig="$(head -c 7 "$f" 2>/dev/null || true)"
+
+            # Print a compact one-line status
+            if [ "$sig" = "!<arch>" ]; then
+              echo "OK   size=$size  sig=$sig  file=$(basename "$f")"
+            else
+              echo "BAD  size=$size  sig='$sig' file=$(basename "$f")"
+              echo "---- first 15 lines (to detect LFS pointer / HTML / errors) ----"
+              sed -n '1,15p' "$f" || true
+              echo "---- file command ----"
+              file "$f" || true
+              echo "---------------------------------------------------------------"
+              bad=1
+            fi
+          done
+
+          echo
+          echo "=== [5] Summary ==="
+          if [ "$bad" -ne 0 ]; then
+            echo "RESULT: Found BAD .deb files (not real deb ar archives)."
+            echo "Common causes:"
+            echo " - Git LFS pointer file (you committed pointer, not the real binary)"
+            echo " - Downloaded HTML/404 page but saved as .deb"
+            echo " - Truncated/corrupted file"
+            exit 1
+          else
+            echo "RESULT: All .deb files look like real Debian packages."
+          fi
 
       - name: Build ISO (non-root, using existing local-packages)
         run: |
