@@ -1,4 +1,4 @@
-name: Sync release .deb to repo local-packages
+name: Sync release .deb to repo local-packages (Git LFS)
 
 on:
   workflow_dispatch:
@@ -22,12 +22,22 @@ jobs:
           fetch-depth: 0
           submodules: false
           persist-credentials: true
+          lfs: true
 
-      - name: Install tools
+      - name: Install tools (curl/jq/git-lfs)
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y curl jq
+          sudo apt-get install -y curl jq git-lfs
+          git lfs install
+
+      - name: Ensure Git LFS tracks deb packages
+        run: |
+          set -euo pipefail
+          # Track only debs in this folder to avoid LFS for other files
+          git lfs track "build-iso/extras/local-packages/*.deb"
+          # Ensure .gitattributes is included
+          git add .gitattributes || true
 
       - name: Download .deb assets from release to build-iso/extras/local-packages
         env:
@@ -42,13 +52,11 @@ jobs:
           api="https://api.github.com/repos/${OWNER}/${REPO}/releases/tags/${TAG}"
           echo "Fetching: $api"
 
-          # Public repo: không bắt buộc token. Nhưng thêm header để hạn chế rate-limit.
           json="$(curl -fsSL \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ github.token }}" \
             "$api")"
 
-          echo "== Deb assets =="
           urls="$(echo "$json" | jq -r '.assets[] | select(.name|endswith(".deb")) | .browser_download_url')"
           if [ -z "$urls" ]; then
             echo "ERROR: Release $TAG không có asset .deb"
@@ -63,21 +71,27 @@ jobs:
             curl -fL --retry 5 --retry-delay 2 -o "$f" "$u"
           done <<< "$urls"
 
-          echo "== Verify files in $OUT_DIR =="
+          echo "== Files downloaded =="
           ls -lah "$OUT_DIR"
 
-      - name: Commit and push to repo
+      - name: Commit and push to repo (LFS)
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+          # Add debs (will be stored as LFS pointers because of tracking)
           git add build-iso/extras/local-packages/*.deb || true
 
           if git diff --cached --quiet; then
-            echo "No changes to commit (files already up-to-date)."
+            echo "No changes to commit."
             exit 0
           fi
 
-          git commit -m "Sync .deb assets from release ${{ inputs.tag }}"
+          git commit -m "Sync .deb assets from release ${{ inputs.tag }} (LFS)"
           git push
+
+      - name: Debug LFS status (optional)
+        if: always()
+        run: |
+          git lfs ls-files || true
