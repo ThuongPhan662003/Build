@@ -1,0 +1,83 @@
+name: Sync release .deb to repo local-packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. deb-v0.0.1)"
+        required: true
+        default: "deb-v0.0.1"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (no submodules)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: false
+          persist-credentials: true
+
+      - name: Install tools
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y curl jq
+
+      - name: Download .deb assets from release to build-iso/extras/local-packages
+        env:
+          OWNER: ThuongPhan662003
+          REPO: Build
+          TAG: ${{ inputs.tag }}
+          OUT_DIR: build-iso/extras/local-packages
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT_DIR"
+
+          api="https://api.github.com/repos/${OWNER}/${REPO}/releases/tags/${TAG}"
+          echo "Fetching: $api"
+
+          # Public repo: không bắt buộc token. Nhưng thêm header để hạn chế rate-limit.
+          json="$(curl -fsSL \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            "$api")"
+
+          echo "== Deb assets =="
+          urls="$(echo "$json" | jq -r '.assets[] | select(.name|endswith(".deb")) | .browser_download_url')"
+          if [ -z "$urls" ]; then
+            echo "ERROR: Release $TAG không có asset .deb"
+            echo "$json" | jq -r '.assets[]?.name'
+            exit 1
+          fi
+
+          while IFS= read -r u; do
+            [ -n "$u" ] || continue
+            f="${OUT_DIR}/$(basename "$u")"
+            echo "Downloading: $u -> $f"
+            curl -fL --retry 5 --retry-delay 2 -o "$f" "$u"
+          done <<< "$urls"
+
+          echo "== Verify files in $OUT_DIR =="
+          ls -lah "$OUT_DIR"
+
+      - name: Commit and push to repo
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add build-iso/extras/local-packages/*.deb || true
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit (files already up-to-date)."
+            exit 0
+          fi
+
+          git commit -m "Sync .deb assets from release ${{ inputs.tag }}"
+          git push
