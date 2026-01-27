@@ -1,0 +1,54 @@
+name: Download .deb from Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (vd: deb-v0.0.1)"
+        required: true
+        default: "deb-v0.0.1"
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI (gh)
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y gh
+
+      - name: Download all .deb assets from Release
+        shell: bash
+        env:
+          # Token mặc định của Actions (KHÔNG cần PAT)
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ThuongPhan662003
+          REPO: Build
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p debs
+
+          echo "Downloading *.deb from $OWNER/$REPO tag=$TAG ..."
+          gh release download "$TAG" \
+            -R "$OWNER/$REPO" \
+            -p "*.deb" \
+            -D debs
+
+          echo "Downloaded files:"
+          ls -lh debs
+
+      - name: Upload debs as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: debs-${{ inputs.tag }}
+          path: debs/*.deb
+          if-no-files-found: error
