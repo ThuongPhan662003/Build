@@ -4,7 +4,6 @@ on:
   workflow_dispatch:
 
 env:
-  # bật debug log chi tiết
   ACTIONS_STEP_DEBUG: "true"
   ACTIONS_RUNNER_DEBUG: "true"
 
@@ -18,14 +17,31 @@ jobs:
         shell: bash
 
     steps:
-      # 1) Checkout bình thường (KHÔNG bật lfs ở đây để tránh fail ngay)
       - name: Checkout repo (no LFS at checkout)
         uses: actions/checkout@v4
         with:
           submodules: false
           fetch-depth: 0
 
-      # 2) Cài tool cần thiết để kéo LFS và debug
+      # ✅ NEW: log vị trí + xác nhận có .git
+      - name: Show workspace + git status
+        run: |
+          set -euxo pipefail
+          echo "PWD=$(pwd)"
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+          ls -lah "$GITHUB_WORKSPACE" | sed -n '1,120p' || true
+          if [ -d "$GITHUB_WORKSPACE/.git" ]; then
+            echo "OK: .git exists"
+          else
+            echo "ERROR: .git NOT found in GITHUB_WORKSPACE"
+            echo "Find any .git:"
+            find / -maxdepth 4 -type d -name .git 2>/dev/null | head -n 20 || true
+            exit 1
+          fi
+          cd "$GITHUB_WORKSPACE"
+          git rev-parse --is-inside-work-tree
+          git status --porcelain || true
+
       - name: Install required tools (git + git-lfs + debug utils)
         run: |
           set -euxo pipefail
@@ -37,22 +53,24 @@ jobs:
           git --version
           git lfs version
 
-      # 3) Kéo LFS objects thật về (đây là bước quyết định)
+      # ✅ FIX: luôn cd vào workspace trước khi chạy git lfs
       - name: Pull Git LFS objects
+        working-directory: ${{ github.workspace }}
         run: |
           set -euxo pipefail
+          pwd
+          git rev-parse --is-inside-work-tree
           git lfs install --local
           git lfs env || true
           git lfs ls-files || true
           git lfs pull
 
-      # 4) Kiểm tra local-packages có còn pointer không + in log rõ ràng
       - name: Diagnose local-packages (show errors clearly)
         run: |
           set -euxo pipefail
           DIR="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
           echo "DIR=$DIR"
-          ls -lah "$DIR" | sed -n '1,80p'
+          ls -lah "$DIR" | sed -n '1,80p' || true
 
           echo "=== Check for LFS pointer files ==="
           bad=0
@@ -60,15 +78,13 @@ jobs:
             head1="$(head -n 1 "$f" || true)"
             if [[ "$head1" == "version https://git-lfs.github.com/spec/v1" ]]; then
               echo "LFS_POINTER: $(basename "$f")"
-              echo "--- first 5 lines ---"
               sed -n '1,5p' "$f" || true
-              echo "---------------------"
               bad=1
             fi
           done < <(find "$DIR" -maxdepth 1 -type f -name "*.deb" -print0)
 
           if [ "$bad" -ne 0 ]; then
-            echo "ERROR: Found LFS pointer files in local-packages. LFS pull didn't fetch real binaries."
+            echo "ERROR: Found LFS pointer files in local-packages."
             exit 1
           fi
 
@@ -78,27 +94,22 @@ jobs:
             sig="$(head -c 7 "$f" || true)"
             if [ "$sig" != "!<arch>" ]; then
               echo "BAD_DEB: $(basename "$f") sig='$sig' size=$(stat -c%s "$f" || true)"
-              echo "--- first 20 lines ---"
               sed -n '1,20p' "$f" || true
-              echo "----------------------"
               bad2=1
             fi
           done
-
           if [ "$bad2" -ne 0 ]; then
             echo "ERROR: Some .deb files are not valid ar archives."
             exit 1
           fi
           echo "OK: local-packages are valid."
 
-      # 5) Cài simple-cdd (bạn nói đừng làm bước 1 tải deb; cái này chỉ cài tool build)
       - name: Install simple-cdd
         run: |
           set -euxo pipefail
           apt-get update
           apt-get install -y --no-install-recommends simple-cdd
 
-      # 6) Build non-root và tee log để bạn nhìn được lỗi
       - name: Build ISO (non-root)
         run: |
           set -euxo pipefail
@@ -114,7 +125,6 @@ jobs:
             build-simple-cdd --conf \"$CONF\" --dvd --local-packages \"$LOCAL_PKGS\" 2>&1 | tee \"$GITHUB_WORKSPACE/build-iso/build.log\"
           "
 
-      # 7) Luôn in tail log khi fail để bạn thấy lỗi
       - name: Show tail build log (always)
         if: always()
         run: |
