@@ -5,14 +5,11 @@ on:
 
 jobs:
   build_iso:
-    name: build_iso
     runs-on: ubuntu-latest
 
-    # Chạy toàn bộ job bên trong Debian container
     container:
       image: debian:bookworm
 
-    # Ép tất cả run step dùng bash (fix lỗi pipefail)
     defaults:
       run:
         shell: bash
@@ -23,66 +20,44 @@ jobs:
         with:
           submodules: false
 
-      - name: Install tools in Debian container
+      - name: Install tools
         run: |
           set -euo pipefail
           apt-get update
-          # bash + ca-certificates + gnupg + keyring để verify repo Debian
+
+          # distro-info-data: FIX lỗi thiếu /usr/share/distro-info/debian.csv
           apt-get install -y --no-install-recommends \
             bash ca-certificates curl git \
             gnupg dirmngr debian-archive-keyring \
+            distro-info-data \
             simple-cdd xorriso isolinux syslinux-common mtools
+
           update-ca-certificates
 
       - name: Prepare non-root builder user
         run: |
           set -euo pipefail
           useradd -m -s /bin/bash builder || true
-          # đảm bảo builder có quyền ghi vào workspace
           chown -R builder:builder "$GITHUB_WORKSPACE"
-          # tạo GNUPG home để tránh lỗi random_seed
+
           install -d -m 700 -o builder -g builder /home/builder/.gnupg
           touch /home/builder/.gnupg/random_seed
           chown builder:builder /home/builder/.gnupg/random_seed
 
-      - name: Show local-packages content
-        run: |
-          set -euo pipefail
-          ls -lah build-iso/extras/local-packages || true
-
-      - name: Build ISO (non-root, with local-packages)
+      - name: Build ISO (build-simple-cdd)
         run: |
           set -euo pipefail
 
-          # ĐƯỜNG DẪN LOCAL PACKAGES
           LOCAL_PKGS="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
 
-          # Nếu repo bạn có script build riêng (khuyến nghị)
-          # Ví dụ: build-iso/build-simple-cdd
-          if [[ -x "build-iso/build-simple-cdd" ]]; then
-            su - builder -c "cd '$GITHUB_WORKSPACE' && ./build-iso/build-simple-cdd '$LOCAL_PKGS'"
-            exit 0
-          fi
-
-          # Nếu bạn chạy trực tiếp build-simple-cdd:
-          # NOTE: bạn cần có file config simple-cdd.conf trong build-iso/
-          # và trong config đã trỏ đúng distro/mirror.
-          CONF="$GITHUB_WORKSPACE/build-iso/simple-cdd.conf"
-          if [[ ! -f "$CONF" ]]; then
-            echo "ERROR: Không tìm thấy $CONF. Hãy tạo build-iso/simple-cdd.conf hoặc dùng script build-iso/build-simple-cdd."
-            exit 1
-          fi
-
-          # chạy build dưới user builder
-          su - builder -c "cd '$GITHUB_WORKSPACE/build-iso' && \
-            build-simple-cdd --conf '$CONF' --local-packages '$LOCAL_PKGS'"
+          # chạy build dưới user builder, trong thư mục build-iso
+          su - builder -c "cd '$GITHUB_WORKSPACE/build-iso' && build-simple-cdd --local-packages '$LOCAL_PKGS'"
 
       - name: Collect ISO files
         run: |
           set -euo pipefail
           mkdir -p out
-          # simple-cdd thường tạo ISO trong build-iso/ hoặc build-iso/images/
-          find build-iso -maxdepth 3 -type f -name '*.iso' -print -exec cp -v {} out/ \;
+          find "$GITHUB_WORKSPACE/build-iso" -maxdepth 4 -type f -name '*.iso' -print -exec cp -v {} out/ \;
           ls -lah out
 
       - name: Upload ISO artifact
