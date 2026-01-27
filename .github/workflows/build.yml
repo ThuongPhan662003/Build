@@ -6,29 +6,24 @@ on:
 jobs:
   build-iso:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     env:
-      RELEASE_REPO: "ThuongPhan662003/Build"
-      RELEASE_TAG: "deb-v0.0.1"
+      RELEASE_PAGE: "https://github.com/ThuongPhan662003/Build/releases/tag/deb-v0.0.1"
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build ISO (download release assets -> local-packages -> build-simple-cdd)
+      - name: Build ISO (download assets from release page -> local-packages -> build-simple-cdd)
         shell: bash
         run: |
           set -euo pipefail
           cd "$GITHUB_WORKSPACE"
 
-          # ===== Paths =====
           LOCAL_PKGS="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
           CONF="$GITHUB_WORKSPACE/build-iso/simple-cdd.conf"
           LOG="$GITHUB_WORKSPACE/build-simple-cdd.log"
 
-          # ===== Print lỗi chi tiết nếu fail =====
           trap 'rc=$?;
             echo "FAILED at line $LINENO: $BASH_COMMAND (exit=$rc)";
             echo "=== PWD ==="; pwd;
@@ -36,46 +31,48 @@ jobs:
             echo "=== ls -la build-iso ==="; ls -la build-iso || true;
             echo "=== ls -la build-iso/extras ==="; ls -la build-iso/extras || true;
             echo "=== ls -la local-packages ==="; ls -la "$LOCAL_PKGS" || true;
-            echo "=== find simple-cdd.conf ==="; find . -maxdepth 4 -name "simple-cdd.conf" -print || true;
             echo "=== tail build-simple-cdd.log ==="; tail -n 200 "$LOG" 2>/dev/null || echo "(no build-simple-cdd.log)";
-            echo "=== tmp logs ==="; ls -la tmp 2>/dev/null || true;
-            find tmp -maxdepth 3 -type f -name "*.log" -print -exec tail -n 120 {} \; 2>/dev/null || true;
             exit $rc
           ' ERR
 
           echo "Using local packages dir: $LOCAL_PKGS"
           mkdir -p "$LOCAL_PKGS"
 
-          # ===== Install tools =====
           sudo apt-get update -y
-          sudo apt-get install -y curl jq simple-cdd
+          sudo apt-get install -y curl grep sed simple-cdd
 
-          # ===== Download release assets (PUBLIC, no token) =====
-          api="https://api.github.com/repos/${RELEASE_REPO}/releases/tags/${RELEASE_TAG}"
-          echo "Fetching release JSON: $api"
-          release_json="$(curl -fsSL -H "Accept: application/vnd.github+json" "$api")"
+          # Verify conf exists
+          test -f "$CONF"
 
-          urls="$(echo "$release_json" | jq -r '.assets[]?.browser_download_url')"
-          if [[ -z "${urls// }" ]]; then
-            echo "ERROR: No assets found in release ${RELEASE_REPO} tag=${RELEASE_TAG}"
-            echo "$release_json" | jq -r '.message? // empty'
+          echo "Fetching release page: $RELEASE_PAGE"
+          html="$(curl -fsSL "$RELEASE_PAGE")"
+
+          # Lấy các link download asset trực tiếp từ HTML (ưu tiên .deb)
+          # Ví dụ link dạng: /ThuongPhan662003/Build/releases/download/deb-v0.0.1/abc.deb
+          mapfile -t urls < <(echo "$html" \
+            | grep -oE '/ThuongPhan662003/Build/releases/download/[^"]+\.deb' \
+            | sed 's#^#https://github.com#' \
+            | sort -u)
+
+          if [[ ${#urls[@]} -eq 0 ]]; then
+            echo "ERROR: Không tìm thấy asset .deb trên trang release."
+            echo "Gợi ý: kiểm tra release có upload file .deb chưa."
             exit 1
           fi
 
+          echo "Found ${#urls[@]} .deb assets:"
+          printf ' - %s\n' "${urls[@]}"
+
           echo "Downloading assets to $LOCAL_PKGS"
-          while IFS= read -r u; do
-            [[ -z "$u" ]] && continue
+          for u in "${urls[@]}"; do
             echo " - $u"
             curl -fL -o "$LOCAL_PKGS/$(basename "$u")" "$u"
-          done <<< "$urls"
+          done
 
-          echo "Downloaded release assets:"
-          ls -lh "$LOCAL_PKGS" || true
+          echo "Downloaded files:"
+          ls -lh "$LOCAL_PKGS"
 
-          # ===== Verify conf exists (FIX lỗi trước) =====
-          test -f "$CONF"
-
-          # ===== Build ISO =====
+          # Build ISO
           build-simple-cdd \
             --conf "$CONF" \
             --dist bookworm \
