@@ -1,0 +1,59 @@
+name: Build ISO (simple-cdd)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (no submodules)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: false
+
+      - name: Install simple-cdd + tools
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y simple-cdd xorriso rsync ca-certificates
+
+      - name: Build ISO (build-simple-cdd)
+        run: |
+          set -euo pipefail
+          cd build-iso
+
+          # simple-cdd tạo output theo config; chạy lệnh build
+          # Nếu bạn có file simple-cdd.conf trong build-iso/ thì lệnh sau sẽ dùng nó.
+          build-simple-cdd --verbose
+
+          echo "=== Build outputs ==="
+          find . -maxdepth 2 -type f \( -name "*.iso" -o -name "*.log" \) -print -exec ls -lah {} \;
+
+      - name: Collect ISO outputs
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          # gom tất cả file .iso ở trong build-iso/
+          find build-iso -type f -name "*.iso" -exec cp -v {} out/ \;
+
+          echo "=== ISO collected ==="
+          ls -lah out || true
+
+          # fail rõ ràng nếu không ra ISO
+          if ! ls out/*.iso >/dev/null 2>&1; then
+            echo "ERROR: Không tìm thấy file .iso sau khi build."
+            exit 1
+          fi
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iso-output
+          path: out/*.iso
+          if-no-files-found: error
