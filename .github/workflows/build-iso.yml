@@ -26,8 +26,6 @@ jobs:
       - name: Build (non-root)
         run: |
           set -euo pipefail
-          useradd -m -s /bin/bash builder || true
-          chown -R builder:builder "$GITHUB_WORKSPACE"
           LOCAL_PKGS="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
           CONF="$GITHUB_WORKSPACE/build-iso/simple-cdd.conf"
           build-simple-cdd --conf '$CONF' --dvd --local-packages '$LOCAL_PKGS'
