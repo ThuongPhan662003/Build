@@ -112,7 +112,6 @@ jobs:
             --conf "$GITHUB_WORKSPACE/simple-cdd.conf" \
             --dist bookworm \
             --force-root \
-            --verbose \
             --local-packages "$LOCAL_PKGS" \
             --logfile "$GITHUB_WORKSPACE/build-simple-cdd.log"
           rc=$?
