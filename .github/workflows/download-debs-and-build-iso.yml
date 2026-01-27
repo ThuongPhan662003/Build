@@ -1,0 +1,101 @@
+name: Download .deb from Release + Build ISO (simple-cdd)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (vd: deb-v0.0.1)"
+        required: true
+        default: "deb-v0.0.1"
+      owner:
+        description: "GitHub owner/org chứa repo release"
+        required: true
+        default: "ThuongPhan662003"
+      repo:
+        description: "Repo chứa release"
+        required: true
+        default: "Build"
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies (gh + simple-cdd)
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y \
+            gh curl jq \
+            simple-cdd python3-simple-cdd reprepro xorriso \
+            debian-cd isolinux syslinux-common mtools hfsutils
+
+      - name: Download *.deb assets from Release into local-packages
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}   # token mặc định, repo public vẫn OK
+          OWNER: ${{ inputs.owner }}
+          REPO:  ${{ inputs.repo }}
+          TAG:   ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+
+          OUT_DIR="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
+          mkdir -p "$OUT_DIR"
+
+          # Dọn deb cũ nếu có
+          rm -f "$OUT_DIR"/*.deb || true
+
+          echo "Downloading *.deb from $OWNER/$REPO release tag=$TAG ..."
+          gh release download "$TAG" \
+            -R "$OWNER/$REPO" \
+            -p "*.deb" \
+            -D "$OUT_DIR"
+
+          echo "Downloaded .deb files:"
+          ls -lh "$OUT_DIR"/*.deb
+
+      - name: Build ISO with simple-cdd
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Bạn đang có build-iso/simple-cdd.conf trong repo
+          CONF="$GITHUB_WORKSPACE/build-iso/simple-cdd.conf"
+          test -f "$CONF" || (echo "Missing $CONF" && exit 1)
+
+          # Chạy simple-cdd trong thư mục build-iso để nó tạo output đúng cấu trúc
+          cd "$GITHUB_WORKSPACE/build-iso"
+
+          # Build + log
+          sudo -E simple-cdd --conf ./simple-cdd.conf 2>&1 | tee "$GITHUB_WORKSPACE/build-simple-cdd.log"
+
+          echo "Find ISO..."
+          cd "$GITHUB_WORKSPACE"
+          mkdir -p out
+
+          # simple-cdd thường tạo ISO trong build-iso/images/ hoặc build-iso/
+          ISO_PATH="$(find "$GITHUB_WORKSPACE/build-iso" -maxdepth 3 -type f -name "*.iso" | head -n 1 || true)"
+          if [ -z "$ISO_PATH" ]; then
+            echo "ERROR: No ISO produced. Check build-simple-cdd.log"
+            exit 1
+          fi
+
+          cp -v "$ISO_PATH" out/
+          echo "ISO copied to out/:"
+          ls -lh out/*.iso
+
+      - name: Upload ISO + build log
+        uses: actions/upload-artifact@v4
+        with:
+          name: iso-${{ inputs.tag }}
+          path: |
+            out/*.iso
+            build-simple-cdd.log
+          if-no-files-found: error
