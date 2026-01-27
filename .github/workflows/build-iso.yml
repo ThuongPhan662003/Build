@@ -1,4 +1,4 @@
-name: Build ISO (simple-cdd only)
+name: Build ISO (simple-cdd, non-root)
 
 on:
   workflow_dispatch:
@@ -15,60 +15,85 @@ jobs:
         shell: bash
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo (no submodules)
+        uses: actions/checkout@v4
         with:
           submodules: false
 
-      - name: Install simple-cdd + required deps
+      - name: Install simple-cdd and deps
         run: |
           set -euo pipefail
           apt-get update
           apt-get install -y --no-install-recommends \
-            simple-cdd reprepro xorriso \
-            ca-certificates \
-            gnupg gpgv \
-            debian-archive-keyring
-          update-ca-certificates || true
+            simple-cdd ca-certificates gnupg gpgv \
+            debian-archive-keyring distro-info-data \
+            reprepro fakeroot sudo xorriso rsync \
+            apt-utils
 
-      - name: Build ISO (non-root) using existing local-packages
+      - name: Prepare non-root builder user
+        run: |
+          set -euo pipefail
+          useradd -m -s /bin/bash builder || true
+          mkdir -p /home/builder/.gnupg
+          chmod 700 /home/builder/.gnupg
+          chown -R builder:builder /home/builder/.gnupg
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+
+      - name: Show local-packages content (no SIGPIPE)
+        run: |
+          set -euo pipefail
+          LOCAL_PKGS="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
+          echo "LOCAL_PKGS=$LOCAL_PKGS"
+          if [ ! -d "$LOCAL_PKGS" ]; then
+            echo "ERROR: local-packages folder not found: $LOCAL_PKGS"
+            exit 1
+          fi
+
+          echo "=== local-packages: first 200 filenames (sorted) ==="
+          find "$LOCAL_PKGS" -maxdepth 1 -type f -printf "%f\n" | sort | sed -n '1,200p'
+
+          echo "=== local-packages: total files ==="
+          find "$LOCAL_PKGS" -maxdepth 1 -type f | wc -l
+
+          echo "=== sample sizes (first 50) ==="
+          find "$LOCAL_PKGS" -maxdepth 1 -type f -printf "%s %f\n" | sort -n | sed -n '1,50p'
+
+      - name: Build ISO (non-root, using existing local-packages)
         run: |
           set -euo pipefail
 
-          # Paths
           CONF="$GITHUB_WORKSPACE/build-iso/simple-cdd.conf"
           LOCAL_PKGS="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
 
-          echo "CONF=$CONF"
-          echo "LOCAL_PKGS=$LOCAL_PKGS"
+          if [ ! -f "$CONF" ]; then
+            echo "ERROR: CONF not found: $CONF"
+            exit 1
+          fi
 
-          # Validate inputs exist
-          test -f "$CONF"
-          test -d "$LOCAL_PKGS"
-          ls -lah "$LOCAL_PKGS" | head -n 50
+          # Build output dir (writeable by builder)
+          mkdir -p "$GITHUB_WORKSPACE/build-iso/out"
+          chown -R builder:builder "$GITHUB_WORKSPACE/build-iso/out"
 
-          # Create non-root builder and fix perms
-          useradd -m -s /bin/bash builder || true
-          chown -R builder:builder "$GITHUB_WORKSPACE"
-          install -d -m 700 -o builder -g builder /home/builder/.gnupg
-
-          # Run build-simple-cdd as builder
-          su - builder -c "
+          # Run build as non-root (simple-cdd discourages root)
+          sudo -u builder -H bash -lc "
             set -euo pipefail
-            export HOME=/home/builder
-            export GNUPGHOME=/home/builder/.gnupg
-            chmod 700 \"\$GNUPGHOME\" || true
-
-            cd \"$GITHUB_WORKSPACE\"
-            build-simple-cdd --conf \"$CONF\" --dvd --local-packages \"$LOCAL_PKGS\"
+            cd '$GITHUB_WORKSPACE/build-iso'
+            echo 'Running build-simple-cdd...'
+            build-simple-cdd --conf '$CONF' --dvd --local-packages '$LOCAL_PKGS'
           "
 
-      - name: Show ISO outputs
+      - name: Collect ISO files
         run: |
           set -euo pipefail
-          find "$GITHUB_WORKSPACE" -type f -name "*.iso" -print -exec ls -lh {} \;
-          find "$GITHUB_WORKSPACE" -type f -name "*.iso" | grep -q .
+          echo "=== Find ISO outputs ==="
+          find "$GITHUB_WORKSPACE" -type f -name '*.iso' -print || true
+          # Fail if none
+          if ! find "$GITHUB_WORKSPACE" -type f -name '*.iso' | grep -q .; then
+            echo "ERROR: No ISO produced."
+            exit 1
+          fi
 
-      - name: Upload ISO
+      - name: Upload ISO artifact
         uses: actions/upload-artifact@v4
         with:
           name: iso-output
