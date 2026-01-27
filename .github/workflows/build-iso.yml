@@ -10,37 +10,52 @@ jobs:
   build_iso:
     runs-on: ubuntu-latest
 
+    # Chạy bên trong Debian để có keyring đúng
+    container:
+      image: debian:bookworm
+
     steps:
-      - name: Checkout (no submodules)
+      - name: Install tools in Debian container
+        run: |
+          set -euo pipefail
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            git ca-certificates gnupg \
+            debian-archive-keyring \
+            simple-cdd xorriso rsync
+
+      - name: Checkout repo (inside container)
         uses: actions/checkout@v4
         with:
           submodules: false
           fetch-depth: 0
 
-      - name: Install simple-cdd
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y simple-cdd xorriso rsync ca-certificates
-
-      - name: Build ISO (with local-packages)
+      - name: Build ISO (non-root, with local-packages)
         run: |
           set -euo pipefail
 
-          # thư mục chứa local-packages trong repo
-          LOCAL_PKGS="$(pwd)/build-iso/extras/local-packages"
-          echo "Using local packages dir: $LOCAL_PKGS"
-          ls -lah "$LOCAL_PKGS" || true
+          # tạo user thường để chạy simple-cdd
+          useradd -m -s /bin/bash builder || true
+          chown -R builder:builder "$GITHUB_WORKSPACE"
 
-          # build-simple-cdd chạy trong thư mục build-iso (nơi có simple-cdd.conf)
-          cd build-iso
+          # tạo GNUPG home để gpg không lỗi random_seed
+          install -d -m 700 "$GITHUB_WORKSPACE/.gnupg-ci"
+          chown -R builder:builder "$GITHUB_WORKSPACE/.gnupg-ci"
 
-          # Gắn đường dẫn local-packages vào build
-          # (simple-cdd sẽ dùng packages này làm nguồn bổ sung)
-          build-simple-cdd --verbose --local-packages "$LOCAL_PKGS"
+          su - builder -c "
+            set -euo pipefail
+            export GNUPGHOME='$GITHUB_WORKSPACE/.gnupg-ci'
 
-          echo "=== ISO outputs ==="
-          find . -type f -name "*.iso" -print -exec ls -lah {} \;
+            LOCAL_PKGS='$GITHUB_WORKSPACE/build-iso/extras/local-packages'
+            echo 'Using local packages dir:' \$LOCAL_PKGS
+            ls -lah \"\$LOCAL_PKGS\" || true
+
+            cd '$GITHUB_WORKSPACE/build-iso'
+            build-simple-cdd --verbose --local-packages \"\$LOCAL_PKGS\"
+
+            echo '=== ISO outputs ==='
+            find . -type f -name '*.iso' -print -exec ls -lah {} \;
+          "
 
       - name: Upload ISO artifact
         uses: actions/upload-artifact@v4
