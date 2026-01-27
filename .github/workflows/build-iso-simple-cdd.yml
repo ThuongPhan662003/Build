@@ -1,0 +1,124 @@
+name: Build ISO with simple-cdd (include release debs)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  build_iso:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:bookworm
+
+    steps:
+      - name: Install tools
+        run: |
+          set -e
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            ca-certificates curl gnupg jq \
+            simple-cdd debian-cd xorriso genisoimage isolinux syslinux-common
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare local-packages folder (and symlink for compatibility)
+        run: |
+          set -e
+          cd "$GITHUB_WORKSPACE"
+
+          # folder bạn yêu cầu
+          mkdir -p build-iso/extras/local-packages
+
+          # nếu simple-cdd.conf của bạn đang trỏ về extras/local-packages,
+          # tạo symlink để khỏi phải sửa config
+          mkdir -p extras
+          ln -sfn ../build-iso/extras/local-packages extras/local-packages
+
+          echo "Local packages dir:"
+          ls -la build-iso/extras/local-packages
+          ls -la extras/local-packages || true
+
+      - name: Download release packages (deb-v0.0.1) into build-iso/extras/local-packages
+        env:
+          GH_REPO: ThuongPhan662003/Build
+          GH_TAG: deb-v0.0.1
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          cd "$GITHUB_WORKSPACE"
+
+          OUT_DIR="build-iso/extras/local-packages"
+
+          echo "Fetching release info: $GH_REPO tag=$GH_TAG"
+          release_json="$(curl -fsSL \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GH_REPO}/releases/tags/${GH_TAG}")"
+
+          # Lấy browser_download_url của tất cả assets
+          urls="$(echo "$release_json" | jq -r '.assets[].browser_download_url')"
+
+          if [ -z "$urls" ]; then
+            echo "No assets found in release ${GH_TAG}"
+            echo "$release_json" | jq -r '.message? // empty'
+            exit 1
+          fi
+
+          echo "Downloading assets to $OUT_DIR ..."
+          echo "$urls" | while read -r url; do
+            [ -z "$url" ] && continue
+            echo " - $url"
+            # download (kèm auth để dùng được cả repo private)
+            curl -fL \
+              -H "Authorization: Bearer $TOKEN" \
+              -o "$OUT_DIR/$(basename "$url")" \
+              "$url"
+          done
+
+          echo "Files downloaded:"
+          ls -lh "$OUT_DIR"
+
+          # Nếu asset là .deb thì OK. Nếu là .tar.gz/.zip chứa .deb thì tự bung ra.
+          shopt -s nullglob
+          for f in "$OUT_DIR"/*.tar.gz "$OUT_DIR"/*.tgz; do
+            echo "Extract: $f"
+            tar -xzf "$f" -C "$OUT_DIR"
+          done
+          for f in "$OUT_DIR"/*.zip; do
+            echo "Extract: $f"
+            apt-get install -y unzip >/dev/null 2>&1 || true
+            unzip -o "$f" -d "$OUT_DIR"
+          done
+
+          echo "Final .deb list:"
+          find "$OUT_DIR" -maxdepth 2 -type f -name "*.deb" -print | head -n 300
+
+      - name: Build ISO with simple-cdd
+        run: |
+          set -e
+          cd "$GITHUB_WORKSPACE"
+
+          # build-simple-cdd thường output ra ./images
+          build-simple-cdd \
+            --conf "$GITHUB_WORKSPACE/simple-cdd.conf" \
+            --dist bookworm \
+            --local-packages "$GITHUB_WORKSPACE/build-iso/extras/local-packages/" \
+            --force-root \
+            --verbose \
+            --logfile "$GITHUB_WORKSPACE/build-simple-cdd.log"
+
+          echo "Build outputs:"
+          ls -la images || true
+          find images -maxdepth 1 -type f -name "*.iso" -print || true
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iso-output
+          if-no-files-found: error
+          path: |
+            images/*.iso
+            build-simple-cdd.log
