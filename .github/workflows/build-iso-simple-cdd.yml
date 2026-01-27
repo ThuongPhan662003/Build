@@ -1,4 +1,4 @@
-name: Build ISO with simple-cdd (include release debs)
+name: Build ISO with simple-cdd (download release debs + local-packages)
 
 on:
   workflow_dispatch: {}
@@ -13,44 +13,28 @@ jobs:
       image: debian:bookworm
 
     steps:
-      - name: Install tools
+      - name: Install tools (simple-cdd + curl + jq)
         run: |
           set -e
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y \
-            ca-certificates curl gnupg jq \
+            ca-certificates curl jq gnupg \
             simple-cdd debian-cd xorriso genisoimage isolinux syslinux-common
 
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Prepare local-packages folder (and symlink for compatibility)
-        run: |
-          set -e
-          cd "$GITHUB_WORKSPACE"
-
-          # folder bạn yêu cầu
-          mkdir -p build-iso/extras/local-packages
-
-          # nếu simple-cdd.conf của bạn đang trỏ về extras/local-packages,
-          # tạo symlink để khỏi phải sửa config
-          mkdir -p extras
-          ln -sfn ../build-iso/extras/local-packages extras/local-packages
-
-          echo "Local packages dir:"
-          ls -la build-iso/extras/local-packages
-          ls -la extras/local-packages || true
-
-      - name: Download release packages (deb-v0.0.1) into build-iso/extras/local-packages
+      - name: Download release assets into build-iso/extras/local-packages
         env:
           GH_REPO: ThuongPhan662003/Build
           GH_TAG: deb-v0.0.1
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TOKEN: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
         run: |
           set -e
           cd "$GITHUB_WORKSPACE"
 
-          OUT_DIR="build-iso/extras/local-packages"
+          OUT_DIR="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
+          mkdir -p "$OUT_DIR"
 
           echo "Fetching release info: $GH_REPO tag=$GH_TAG"
           release_json="$(curl -fsSL \
@@ -58,63 +42,54 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${GH_REPO}/releases/tags/${GH_TAG}")"
 
-          # Lấy browser_download_url của tất cả assets
-          urls="$(echo "$release_json" | jq -r '.assets[].browser_download_url')"
+          assets="$(echo "$release_json" | jq -r '.assets[] | "\(.id) \(.name)"')"
 
-          if [ -z "$urls" ]; then
-            echo "No assets found in release ${GH_TAG}"
+          if [ -z "$assets" ]; then
+            echo "No assets found or token has no access."
             echo "$release_json" | jq -r '.message? // empty'
             exit 1
           fi
 
           echo "Downloading assets to $OUT_DIR ..."
-          echo "$urls" | while read -r url; do
-            [ -z "$url" ] && continue
-            echo " - $url"
-            # download (kèm auth để dùng được cả repo private)
+          echo "$assets" | while read -r id name; do
+            [ -z "$id" ] && continue
+            echo " - id=$id name=$name"
             curl -fL \
               -H "Authorization: Bearer $TOKEN" \
-              -o "$OUT_DIR/$(basename "$url")" \
-              "$url"
+              -H "Accept: application/octet-stream" \
+              "https://api.github.com/repos/${GH_REPO}/releases/assets/${id}" \
+              -o "$OUT_DIR/$name"
           done
 
-          echo "Files downloaded:"
-          ls -lh "$OUT_DIR"
+          echo "Local-packages after download:"
+          ls -lh "$OUT_DIR" | head -n 200
+          echo "Deb count:"
+          find "$OUT_DIR" -maxdepth 1 -type f -name "*.deb" | wc -l
 
-          # Nếu asset là .deb thì OK. Nếu là .tar.gz/.zip chứa .deb thì tự bung ra.
-          shopt -s nullglob
-          for f in "$OUT_DIR"/*.tar.gz "$OUT_DIR"/*.tgz; do
-            echo "Extract: $f"
-            tar -xzf "$f" -C "$OUT_DIR"
-          done
-          for f in "$OUT_DIR"/*.zip; do
-            echo "Extract: $f"
-            apt-get install -y unzip >/dev/null 2>&1 || true
-            unzip -o "$f" -d "$OUT_DIR"
-          done
-
-          echo "Final .deb list:"
-          find "$OUT_DIR" -maxdepth 2 -type f -name "*.deb" -print | head -n 300
-
-      - name: Build ISO with simple-cdd
+      - name: Build ISO with simple-cdd (use --local-packages)
         run: |
           set -e
           cd "$GITHUB_WORKSPACE"
 
-          # build-simple-cdd thường output ra ./images
+          LOCAL_PKGS="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
+
+          echo "Using local packages dir: $LOCAL_PKGS"
+          test -d "$LOCAL_PKGS"
+          test -f simple-cdd.conf
+
           build-simple-cdd \
             --conf "$GITHUB_WORKSPACE/simple-cdd.conf" \
             --dist bookworm \
-            --local-packages "$GITHUB_WORKSPACE/build-iso/extras/local-packages/" \
             --force-root \
             --verbose \
+            --local-packages "$LOCAL_PKGS" \
             --logfile "$GITHUB_WORKSPACE/build-simple-cdd.log"
 
-          echo "Build outputs:"
+          echo "ISO outputs:"
           ls -la images || true
           find images -maxdepth 1 -type f -name "*.iso" -print || true
 
-      - name: Upload ISO artifact
+      - name: Upload ISO + logs
         uses: actions/upload-artifact@v4
         with:
           name: iso-output
@@ -122,3 +97,4 @@ jobs:
           path: |
             images/*.iso
             build-simple-cdd.log
+            simple-cdd.conf
