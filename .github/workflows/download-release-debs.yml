@@ -1,65 +1,63 @@
-name: Download .deb from Release to local-packages
+name: Download deb assets from Release
 
 on:
   workflow_dispatch:
     inputs:
-      release_tag:
-        description: "Release tag to download (e.g., deb-v0.0.1)"
+      tag:
+        description: "Release tag (e.g., deb-v0.0.1)"
         required: true
         default: "deb-v0.0.1"
 
 jobs:
   download:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          submodules: false
 
       - name: Install tools
         run: |
           sudo apt-get update
           sudo apt-get install -y curl jq
 
-      - name: Download .deb assets from release tag into build-iso/extras/local-packages
-        shell: bash
+      - name: Download .deb assets to build-iso/extras/local-packages
+        env:
+          OWNER: ThuongPhan662003
+          REPO: Build
+          TAG: ${{ inputs.tag }}
+          OUT_DIR: build-iso/extras/local-packages
         run: |
           set -euo pipefail
-
-          TAG="${{ inputs.release_tag }}"
-          OWNER_REPO="${GITHUB_REPOSITORY}"   # e.g. ThuongPhan662003/Build
-          OUT_DIR="build-iso/extras/local-packages"
-
           mkdir -p "$OUT_DIR"
-          echo "Downloading .deb assets from tag: $TAG"
-          echo "Output dir: $OUT_DIR"
 
-          API="https://api.github.com/repos/${OWNER_REPO}/releases/tags/${TAG}"
+          api="https://api.github.com/repos/${OWNER}/${REPO}/releases/tags/${TAG}"
+          echo "Fetching release JSON: $api"
+          json="$(curl -fsSL -H "Accept: application/vnd.github+json" "$api")"
 
-          # Lấy danh sách link download của assets .deb
-          mapfile -t URLS < <(
-            curl -fsSL -H "Accept: application/vnd.github+json" "$API" \
-            | jq -r '.assets[] | select(.name|endswith(".deb")) | .browser_download_url'
-          )
+          urls="$(echo "$json" | jq -r '.assets[] | select(.name|endswith(".deb")) | .browser_download_url')"
 
-          if [ "${#URLS[@]}" -eq 0 ]; then
-            echo "No .deb assets found in release tag $TAG"
+          if [ -z "${urls}" ]; then
+            echo "No .deb assets found in release tag ${TAG}"
             exit 1
           fi
 
-          for url in "${URLS[@]}"; do
-            fname="$(basename "$url")"
-            echo "-> $fname"
-            curl -fL --retry 5 --retry-delay 2 -o "$OUT_DIR/$fname" "$url"
-          done
+          echo "Downloading these .deb assets:"
+          echo "$urls"
 
-          echo "Done. Files in $OUT_DIR:"
+          while IFS= read -r u; do
+            [ -n "$u" ] || continue
+            echo "-> $u"
+            curl -fL --retry 5 --retry-delay 2 -o "${OUT_DIR}/$(basename "$u")" "$u"
+          done <<< "$urls"
+
+          echo "=== Downloaded files ==="
           ls -lah "$OUT_DIR"
 
-      - name: Upload downloaded folder as artifact
+      - name: Upload as artifact (optional)
         uses: actions/upload-artifact@v4
         with:
-          name: local-packages-${{ inputs.release_tag }}
-          path: build-iso/extras/local-packages
+          name: local-packages-${{ inputs.tag }}
+          path: build-iso/extras/local-packages/*.deb
+          if-no-files-found: error
