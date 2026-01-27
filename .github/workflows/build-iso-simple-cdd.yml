@@ -1,135 +1,133 @@
-name: Build ISO with simple-cdd (download release debs + print errors)
+name: Build ISO (simple-cdd)
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      release_repo:
+        description: "Repo chứa release .deb (owner/repo). VD: ThuongPhan662003/Build"
+        required: true
+        default: "ThuongPhan662003/Build"
+      release_tag:
+        description: "Tag release. VD: deb-v0.0.1"
+        required: true
+        default: "deb-v0.0.1"
+      dist:
+        description: "Debian dist"
+        required: true
+        default: "bookworm"
 
 permissions:
   contents: read
 
 jobs:
-  build_iso:
+  build-iso:
     runs-on: ubuntu-latest
-    container:
-      image: debian:bookworm
 
     steps:
-      - name: Install tools
-        run: |
-          set -e
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y \
-            ca-certificates curl jq gnupg bash \
-            simple-cdd debian-cd xorriso genisoimage isolinux syslinux-common
-
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Prepare local-packages folder + symlink
-        shell: bash
+      - name: Install dependencies
         run: |
           set -euo pipefail
-          cd "$GITHUB_WORKSPACE"
+          sudo apt-get update
+          sudo apt-get install -y \
+            simple-cdd \
+            genisoimage xorriso \
+            curl jq gnupg ca-certificates
 
-          # Folder bạn muốn chứa deb
-          mkdir -p build-iso/extras/local-packages
-
-          # Symlink để simple-cdd dễ pick theo cơ chế "extras/local-packages"
-          mkdir -p extras
-          ln -sfn ../build-iso/extras/local-packages extras/local-packages
-
-          echo "=== Root ==="
-          ls -la
-          echo "=== build-iso/extras ==="
-          ls -la build-iso/extras || true
-          echo "=== build-iso/extras/local-packages ==="
-          ls -la build-iso/extras/local-packages || true
-          echo "=== extras/local-packages (symlink) ==="
-          ls -la extras/local-packages || true
-
-      - name: Download release assets into build-iso/extras/local-packages
-        shell: bash
+      # Tải các .deb từ release PRIVATE về build-iso/extras/local-packages/
+      # Dùng GitHub API để lấy asset_id, rồi download qua endpoint assets/{id}
+      - name: Download release assets to local-packages (private supported)
         env:
-          GH_REPO: ThuongPhan662003/Build
-          GH_TAG: deb-v0.0.1
-          TOKEN: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ inputs.release_repo }}
+          GH_TAG: ${{ inputs.release_tag }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           set -euo pipefail
+          set -x
           cd "$GITHUB_WORKSPACE"
 
           OUT_DIR="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
           mkdir -p "$OUT_DIR"
 
-          echo "Fetching release info: $GH_REPO tag=$GH_TAG"
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "ERROR: Missing secrets.GH_TOKEN (PAT)."
+            echo "-> Tạo PAT có scope: repo (để đọc repo private + release assets)"
+            exit 1
+          fi
+
+          echo "Fetching release: repo=$GH_REPO tag=$GH_TAG"
           release_json="$(curl -fsSL \
-            -H "Authorization: Bearer $TOKEN" \
+            -H "Authorization: token ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${GH_REPO}/releases/tags/${GH_TAG}")"
 
-          # asset id + name
-          assets="$(echo "$release_json" | jq -r '.assets[] | "\(.id) \(.name)"')"
-
-          if [ -z "$assets" ]; then
-            echo "No assets found or token has no access."
+          # Lấy asset id + name
+          asset_lines="$(echo "$release_json" | jq -r '.assets[]? | "\(.id)\t\(.name)"')"
+          if [ -z "$asset_lines" ]; then
+            echo "No assets found in release ${GH_TAG}"
             echo "$release_json" | jq -r '.message? // empty'
             exit 1
           fi
 
-          echo "Assets:"
-          echo "$assets"
-
-          echo "Downloading to $OUT_DIR ..."
-          echo "$assets" | while read -r id name; do
-            [ -z "${id:-}" ] && continue
-            echo " - id=$id name=$name"
+          echo "Downloading assets into: $OUT_DIR"
+          echo "$asset_lines" | while IFS=$'\t' read -r asset_id asset_name; do
+            [ -z "$asset_id" ] && continue
+            echo " - id=$asset_id name=$asset_name"
+            # Download asset bằng API (ổn cho repo private)
             curl -fL \
-              -H "Authorization: Bearer $TOKEN" \
+              -H "Authorization: token ${GH_TOKEN}" \
               -H "Accept: application/octet-stream" \
-              "https://api.github.com/repos/${GH_REPO}/releases/assets/${id}" \
-              -o "$OUT_DIR/$name"
+              -o "$OUT_DIR/$asset_name" \
+              "https://api.github.com/repos/${GH_REPO}/releases/assets/${asset_id}"
           done
 
-          echo "Downloaded files (head):"
-          ls -lh "$OUT_DIR" | head -n 200
-          echo "Deb count:"
-          find "$OUT_DIR" -maxdepth 1 -type f -name "*.deb" | wc -l
+          echo "Downloaded files:"
+          ls -lh "$OUT_DIR"
 
-      - name: Build ISO with simple-cdd (print exact error)
-        shell: bash
+          echo "Final .deb list (top 200):"
+          find "$OUT_DIR" -maxdepth 2 -type f -name "*.deb" -print | head -n 200
+
+      # Build ISO: dùng --local-packages trỏ đúng build-iso/extras/local-packages
+      # + trap in lỗi chi tiết nếu fail
+      - name: Build ISO with simple-cdd (with detailed error output)
         run: |
           set -euo pipefail
           set -x
           cd "$GITHUB_WORKSPACE"
 
           LOCAL_PKGS="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
-          CONF="$GITHUB_WORKSPACE/simple-cdd.conf"
+          CONF="$GITHUB_WORKSPACE/build-iso/simple-cdd.conf"
           LOG="$GITHUB_WORKSPACE/build-simple-cdd.log"
 
-          trap 'rc=$?; echo "FAILED at line $LINENO: $BASH_COMMAND (exit=$rc)"; \
-                echo "=== PWD ==="; pwd; \
-                echo "=== ls -la (root) ==="; ls -la; \
-                echo "=== ls -la build-iso/extras ==="; ls -la build-iso/extras || true; \
-                echo "=== ls -la local-packages ==="; ls -la "$LOCAL_PKGS" || true; \
-                echo "=== find simple-cdd.conf ==="; find . -maxdepth 3 -name "simple-cdd.conf" -print || true; \
-                echo "=== tail build-simple-cdd.log ==="; tail -n 200 "$LOG" 2>/dev/null || echo "(no build-simple-cdd.log)"; \
-                echo "=== tmp logs ==="; ls -la tmp 2>/dev/null || true; \
-                find tmp -maxdepth 2 -type f -name "*.log" -print -exec tail -n 120 {} \; 2>/dev/null || true; \
-                exit $rc' ERR
+          trap 'rc=$?;
+            echo "FAILED at line $LINENO: $BASH_COMMAND (exit=$rc)";
+            echo "=== PWD ==="; pwd;
+            echo "=== find simple-cdd.conf ==="; find . -maxdepth 4 -name "simple-cdd.conf" -print || true;
+            echo "=== ls -la (root) ==="; ls -la || true;
+            echo "=== ls -la build-iso ==="; ls -la build-iso || true;
+            echo "=== ls -la build-iso/extras ==="; ls -la build-iso/extras || true;
+            echo "=== ls -la local-packages ==="; ls -la "$LOCAL_PKGS" || true;
+            echo "=== tail build-simple-cdd.log ==="; tail -n 250 "$LOG" 2>/dev/null || echo "(no build-simple-cdd.log)";
+            echo "=== tmp logs ==="; ls -la tmp 2>/dev/null || true;
+            find tmp -maxdepth 2 -type f -name "*.log" -print -exec tail -n 160 {} \; 2>/dev/null || true;
+            exit $rc' ERR
 
           echo "Using local packages dir: $LOCAL_PKGS"
-          mkdir -p "$LOCAL_PKGS"
+          test -d "$LOCAL_PKGS"
           test -f "$CONF"
 
-          # Symlink để simple-cdd pick theo kiểu mặc định
+          # (tùy chọn) symlink để một số config/flow của simple-cdd dễ nhận extras/
           mkdir -p extras
           ln -sfn ../build-iso/extras/local-packages extras/local-packages
 
           echo "=== build-simple-cdd --help (first 80 lines) ==="
           build-simple-cdd --help | head -n 80 || true
 
-          # Thử build có --local-packages (nếu tool không hỗ trợ, lỗi sẽ được in ra cụ thể)
           build-simple-cdd \
             --conf "$CONF" \
-            --dist bookworm \
+            --dist "${{ inputs.dist }}" \
             --force-root \
             --verbose \
             --local-packages "$LOCAL_PKGS" \
@@ -140,11 +138,12 @@ jobs:
           find images -maxdepth 1 -type f -name "*.iso" -print || true
 
       - name: Upload ISO + logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: iso-output
-          if-no-files-found: error
+          name: iso-and-logs
           path: |
             images/*.iso
             build-simple-cdd.log
-            simple-cdd.conf
+            tmp/**/*.log
+          if-no-files-found: warn
