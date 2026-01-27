@@ -1,0 +1,14 @@
+.project
+.vscode
+/phpinfo.php
+resources/config.php
+secure/mailto.bat
+secure/*.db
+secure/*.sqlite
+.DS_Store
+
+*.php~
+
+app/yealink/resources/firmware/*
+app/xml_cdr/v_xml_cdr_import.php
+app/xml_cdr/cdr_tmp/*
