@@ -1,4 +1,4 @@
-name: Build ISO (simple-cdd)
+name: Build ISO (minimal)
 
 on:
   workflow_dispatch:
@@ -6,63 +6,35 @@ on:
 jobs:
   build_iso:
     runs-on: ubuntu-latest
-
     container:
       image: debian:bookworm
-
     defaults:
       run:
         shell: bash
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           submodules: false
 
-      - name: Install tools
+      - name: Install simple-cdd and minimal deps
         run: |
           set -euo pipefail
           apt-get update
+          apt-get install -y simple-cdd 
 
-          # distro-info-data: FIX lỗi thiếu /usr/share/distro-info/debian.csv
-          apt-get install -y --no-install-recommends \
-            bash ca-certificates curl git \
-            gnupg dirmngr debian-archive-keyring \
-            distro-info-data \
-            simple-cdd xorriso isolinux syslinux-common mtools
-
-          update-ca-certificates
-
-      - name: Prepare non-root builder user
+      - name: Build (non-root)
         run: |
           set -euo pipefail
           useradd -m -s /bin/bash builder || true
           chown -R builder:builder "$GITHUB_WORKSPACE"
-
-          install -d -m 700 -o builder -g builder /home/builder/.gnupg
-          touch /home/builder/.gnupg/random_seed
-          chown builder:builder /home/builder/.gnupg/random_seed
-
-      - name: Build ISO (build-simple-cdd)
-        run: |
-          set -euo pipefail
-
           LOCAL_PKGS="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
+          CONF="$GITHUB_WORKSPACE/build-iso/simple-cdd.conf"
+          build-simple-cdd --conf 'CONF' --dvd --local-packages '$LOCAL_PKGS'
 
-          # chạy build dưới user builder, trong thư mục build-iso
-          su - builder -c "cd '$GITHUB_WORKSPACE/build-iso' && build-simple-cdd --local-packages '$LOCAL_PKGS'"
-
-      - name: Collect ISO files
-        run: |
-          set -euo pipefail
-          mkdir -p out
-          find "$GITHUB_WORKSPACE/build-iso" -maxdepth 4 -type f -name '*.iso' -print -exec cp -v {} out/ \;
-          ls -lah out
-
-      - name: Upload ISO artifact
+      - name: Upload ISO
         uses: actions/upload-artifact@v4
         with:
           name: iso-output
-          path: out/*.iso
+          path: build-iso/**/*.iso
           if-no-files-found: error
