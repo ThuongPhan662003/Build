@@ -1,4 +1,4 @@
-name: Download .deb packages into repo (PG12 + PHP 7.2)
+name: Download .deb packages into repo (PG12 + PHP 7.2 + NGINX)
 
 on:
   workflow_dispatch: {}
@@ -24,24 +24,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Debug workspace
-        run: |
-          set -e
-          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
-          pwd
-          ls -la
-
-      - name: Add repos (PGDG + Sury) and download .deb into repo folder
+      - name: Add repos and download .deb into repo folder
         run: |
           set -e
 
           OUT_DIR="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
           mkdir -p "$OUT_DIR"
           echo "OUT_DIR=$OUT_DIR"
-          ls -la "$GITHUB_WORKSPACE/build-iso" || true
-          ls -la "$GITHUB_WORKSPACE/build-iso/extras" || true
 
-          # PGDG
+          # -----------------------
+          # 1) PGDG repo (PostgreSQL)
+          # -----------------------
           install -d -m 0755 /usr/share/keyrings
           curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
             | gpg --dearmor -o /usr/share/keyrings/postgresql.gpg
@@ -49,19 +42,38 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" \
             > /etc/apt/sources.list.d/pgdg.list
 
-          # Sury
+          # -----------------------
+          # 2) Sury repo (PHP)
+          # -----------------------
           curl -fsSL https://packages.sury.org/php/apt.gpg \
             | gpg --dearmor -o /usr/share/keyrings/debsuryorg-archive-keyring.gpg
           chmod 0644 /usr/share/keyrings/debsuryorg-archive-keyring.gpg
           echo "deb [signed-by=/usr/share/keyrings/debsuryorg-archive-keyring.gpg] https://packages.sury.org/php/ bookworm main" \
             > /etc/apt/sources.list.d/sury-php.list
 
+          # -----------------------
+          # 3) NGINX repo (mainline)
+          # -----------------------
+          curl -fsSL https://nginx.org/keys/nginx_signing.key \
+            | gpg --dearmor -o /usr/share/keyrings/nginx-archive-keyring.gpg
+          chmod 0644 /usr/share/keyrings/nginx-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/mainline/debian/ bookworm nginx" \
+            > /etc/apt/sources.list.d/nginx.list
+
+          # Update after adding repos
           apt-get update
 
+          # -----------------------
+          # Download PostgreSQL 12
+          # -----------------------
           apt-get -y --download-only \
             -o Dir::Cache::archives="$OUT_DIR" \
-            install postgresql-12 postgresql-client-12 postgresql-contrib-12
+            install \
+            postgresql-12 postgresql-client-12 postgresql-contrib-12
 
+          # -----------------------
+          # Download PHP 7.2 (Sury)
+          # -----------------------
           apt-get -y --download-only \
             -o Dir::Cache::archives="$OUT_DIR" \
             install \
@@ -69,31 +81,33 @@ jobs:
             php7.2-imap php7.2-gd php7.2-xml php7.2-dev php7.2-pgsql \
             php7.2-sqlite3-dbgsym php7.2-sqlite3
 
-          echo "List debs in OUT_DIR:"
-          find "$OUT_DIR" -maxdepth 1 -type f -name "*.deb" -print -exec ls -lh {} \; || true
+          # -----------------------
+          # Download NGINX
+          # -----------------------
+          apt-get -y --download-only \
+            -o Dir::Cache::archives="$OUT_DIR" \
+            install nginx
+
+          echo "Downloaded .deb files:"
+          find "$OUT_DIR" -maxdepth 1 -type f -name "*.deb" -print | head -n 200
+          echo "Count:"
+          find "$OUT_DIR" -maxdepth 1 -type f -name "*.deb" | wc -l
 
       - name: Commit and push to repo (force add if ignored)
         run: |
           set -e
           cd "$GITHUB_WORKSPACE"
 
-          # xem có bị ignore không
-          echo "Git status (before add):"
-          git status --porcelain || true
-
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # FORCE add (nếu build-iso hoặc *.deb bị gitignore)
+          # force add in case repo ignores build-iso or *.deb
           git add -f build-iso/extras/local-packages || true
 
-          echo "Git status (after add):"
-          git status --porcelain || true
-
           if git status --porcelain | grep -q .; then
-            git commit -m "Add deb packages: PG12 + PHP 7.2 (bookworm)"
+            git commit -m "Add deb packages: PG12 + PHP 7.2 + NGINX (bookworm)"
             git push
           else
-            echo "No changes to commit. (Either no .deb downloaded, or files still ignored)"
+            echo "No changes to commit."
           fi
