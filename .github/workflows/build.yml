@@ -1,95 +1,117 @@
-name: Build ISO (simple-cdd)
+name: Build ISO (simple-cdd) + Download .deb from GitHub Release
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "GitHub Release tag (vd: deb-v0.0.1)"
+        required: true
+        default: "deb-v0.0.1"
 
 jobs:
-  build-iso:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-24.04
 
     env:
-      RELEASE_PAGE: "https://github.com/ThuongPhan662003/Build/releases/tag/deb-v0.0.1"
+      # nơi đặt .deb để simple-cdd lấy
+      LOCAL_DEB_DIR: build-iso/extras/local-packages
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build ISO (download assets from release page -> local-packages -> build-simple-cdd)
+      - name: Install tools (curl, jq, simple-cdd)
         shell: bash
         run: |
           set -euo pipefail
-          cd "$GITHUB_WORKSPACE"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            curl jq grep sed ca-certificates \
+            simple-cdd python3-simple-cdd \
+            debian-cd reprepro xorriso isolinux syslinux-common mtools \
+            dctrl-tools dose-distcheck hfsutils lynx
 
-          LOCAL_PKGS="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
-          CONF="$GITHUB_WORKSPACE/build-iso/simple-cdd.conf"
-          LOG="$GITHUB_WORKSPACE/build-simple-cdd.log"
+      # (CÁCH 1) Tải các file .deb từ release về thư mục local-packages
+      # Dùng "download url" của API assets -> không cần token (repo public)
+      - name: Download .deb assets from GitHub Release (no token)
+        shell: bash
+        run: |
+          set -euo pipefail
 
-          trap 'rc=$?;
-            echo "FAILED at line $LINENO: $BASH_COMMAND (exit=$rc)";
-            echo "=== PWD ==="; pwd;
-            echo "=== ls -la (root) ==="; ls -la;
-            echo "=== ls -la build-iso ==="; ls -la build-iso || true;
-            echo "=== ls -la build-iso/extras ==="; ls -la build-iso/extras || true;
-            echo "=== ls -la local-packages ==="; ls -la "$LOCAL_PKGS" || true;
-            echo "=== tail build-simple-cdd.log ==="; tail -n 200 "$LOG" 2>/dev/null || echo "(no build-simple-cdd.log)";
-            exit $rc
-          ' ERR
+          OWNER_REPO="${GITHUB_REPOSITORY}"
+          TAG="${{ inputs.release_tag }}"
+          API="https://api.github.com/repos/${OWNER_REPO}/releases/tags/${TAG}"
 
-          echo "Using local packages dir: $LOCAL_PKGS"
-          mkdir -p "$LOCAL_PKGS"
+          echo "Using release: ${OWNER_REPO} tag=${TAG}"
+          mkdir -p "${LOCAL_DEB_DIR}"
 
-          sudo apt-get update -y
-          sudo apt-get install -y curl grep sed simple-cdd
+          # Lấy JSON release (public nên không cần token)
+          release_json="$(curl -fsSL -H "Accept: application/vnd.github+json" "$API")"
 
-          # Verify conf exists
-          test -f "$CONF"
+          # Lọc các asset .deb, lấy browser_download_url
+          mapfile -t urls < <(
+            echo "$release_json" \
+              | jq -r '.assets[] | select(.name | endswith(".deb")) | .browser_download_url'
+          )
 
-          echo "Fetching release page: $RELEASE_PAGE"
-          html="$(curl -fsSL "$RELEASE_PAGE")"
-
-          # Lấy các link download asset trực tiếp từ HTML (ưu tiên .deb)
-          # Ví dụ link dạng: /ThuongPhan662003/Build/releases/download/deb-v0.0.1/abc.deb
-          mapfile -t urls < <(echo "$html" \
-            | grep -oE '/ThuongPhan662003/Build/releases/download/[^"]+\.deb' \
-            | sed 's#^#https://github.com#' \
-            | sort -u)
-
-          if [[ ${#urls[@]} -eq 0 ]]; then
-            echo "ERROR: Không tìm thấy asset .deb trên trang release."
-            echo "Gợi ý: kiểm tra release có upload file .deb chưa."
+          if [ "${#urls[@]}" -eq 0 ]; then
+            echo "ERROR: No .deb assets found in release tag ${TAG}"
+            echo "Tip: kiểm tra release có asset .deb hay không."
             exit 1
           fi
 
-          echo "Found ${#urls[@]} .deb assets:"
-          printf ' - %s\n' "${urls[@]}"
-
-          echo "Downloading assets to $LOCAL_PKGS"
+          echo "Found ${#urls[@]} .deb assets. Downloading..."
           for u in "${urls[@]}"; do
-            echo " - $u"
-            curl -fL -o "$LOCAL_PKGS/$(basename "$u")" "$u"
+            echo "-> $u"
+            curl -fL --retry 5 --retry-delay 2 -o "${LOCAL_DEB_DIR}/$(basename "$u")" "$u"
           done
 
           echo "Downloaded files:"
-          ls -lh "$LOCAL_PKGS"
+          ls -lh "${LOCAL_DEB_DIR}"
 
-          # Build ISO
-          build-simple-cdd \
-            --conf "$CONF" \
-            --dist bookworm \
-            --force-root \
-            --verbose \
-            --local-packages "$LOCAL_PKGS" \
-            --logfile "$LOG"
+      # Build ISO: CHẠY simple-cdd BẰNG user runner (KHÔNG sudo) để tránh lỗi root
+      - name: Build ISO with simple-cdd (non-root)
+        shell: bash
+        run: |
+          set -euo pipefail
 
-          echo "ISO outputs:"
-          ls -la images || true
-          find images -maxdepth 1 -type f -name "*.iso" -print || true
+          CONF="$GITHUB_WORKSPACE/build-iso/simple-cdd.conf"
+          test -f "$CONF" || (echo "Missing $CONF" && exit 1)
+
+          # đảm bảo runner có quyền ghi trong build-iso
+          sudo chown -R "$USER":"$USER" "$GITHUB_WORKSPACE/build-iso"
+
+          cd "$GITHUB_WORKSPACE/build-iso"
+
+          # build (không sudo)
+          simple-cdd --conf ./simple-cdd.conf 2>&1 | tee "$GITHUB_WORKSPACE/build-simple-cdd.log"
+
+          cd "$GITHUB_WORKSPACE"
+          mkdir -p out
+
+          ISO_PATH="$(find "$GITHUB_WORKSPACE/build-iso" -maxdepth 5 -type f -name "*.iso" | head -n 1 || true)"
+          if [ -z "$ISO_PATH" ]; then
+            echo "ERROR: No ISO produced. Check build-simple-cdd.log"
+            exit 1
+          fi
+
+          cp -v "$ISO_PATH" out/
+          ls -lh out/*.iso
 
       - name: Upload ISO artifact
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: iso-output
-          path: |
-            images/*.iso
-            build-simple-cdd.log
+          path: out/*.iso
+
+      - name: Upload downloaded debs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-assets
+          path: ${{ env.LOCAL_DEB_DIR }}/*.deb
+
+      - name: Upload build log artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build-simple-cdd.log
