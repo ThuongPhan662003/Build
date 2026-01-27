@@ -7,53 +7,44 @@ permissions:
   contents: read
 
 jobs:
-  build-iso:
+  build_iso:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout (no submodules)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
           submodules: false
+          fetch-depth: 0
 
-      - name: Install simple-cdd + tools
+      - name: Install simple-cdd
         run: |
           set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y simple-cdd xorriso rsync ca-certificates
 
-      - name: Build ISO (build-simple-cdd)
+      - name: Build ISO (with local-packages)
         run: |
           set -euo pipefail
+
+          # thư mục chứa local-packages trong repo
+          LOCAL_PKGS="$(pwd)/build-iso/extras/local-packages"
+          echo "Using local packages dir: $LOCAL_PKGS"
+          ls -lah "$LOCAL_PKGS" || true
+
+          # build-simple-cdd chạy trong thư mục build-iso (nơi có simple-cdd.conf)
           cd build-iso
 
-          # simple-cdd tạo output theo config; chạy lệnh build
-          # Nếu bạn có file simple-cdd.conf trong build-iso/ thì lệnh sau sẽ dùng nó.
-          build-simple-cdd --verbose
+          # Gắn đường dẫn local-packages vào build
+          # (simple-cdd sẽ dùng packages này làm nguồn bổ sung)
+          build-simple-cdd --verbose --local-packages "$LOCAL_PKGS"
 
-          echo "=== Build outputs ==="
-          find . -maxdepth 2 -type f \( -name "*.iso" -o -name "*.log" \) -print -exec ls -lah {} \;
-
-      - name: Collect ISO outputs
-        run: |
-          set -euo pipefail
-          mkdir -p out
-          # gom tất cả file .iso ở trong build-iso/
-          find build-iso -type f -name "*.iso" -exec cp -v {} out/ \;
-
-          echo "=== ISO collected ==="
-          ls -lah out || true
-
-          # fail rõ ràng nếu không ra ISO
-          if ! ls out/*.iso >/dev/null 2>&1; then
-            echo "ERROR: Không tìm thấy file .iso sau khi build."
-            exit 1
-          fi
+          echo "=== ISO outputs ==="
+          find . -type f -name "*.iso" -print -exec ls -lah {} \;
 
       - name: Upload ISO artifact
         uses: actions/upload-artifact@v4
         with:
           name: iso-output
-          path: out/*.iso
+          path: build-iso/**/*.iso
           if-no-files-found: error
