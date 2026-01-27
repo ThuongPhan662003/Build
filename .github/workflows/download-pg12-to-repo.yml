@@ -1,0 +1,69 @@
+name: Download PG12 debs into repo folder
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write   # cho phép commit/push bằng GITHUB_TOKEN
+
+jobs:
+  download_and_commit:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:bookworm
+
+    steps:
+      - name: Install git + tools
+        run: |
+          set -e
+          apt-get update
+          apt-get install -y git ca-certificates curl gnupg
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Add PGDG repo + download .deb into repo folder
+        run: |
+          set -e
+
+          # Add PGDG key
+          install -d -m 0755 /usr/share/keyrings
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+            | gpg --dearmor -o /usr/share/keyrings/postgresql.gpg
+          chmod 0644 /usr/share/keyrings/postgresql.gpg
+
+          # Add PGDG repo for Debian bookworm
+          echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" \
+            > /etc/apt/sources.list.d/pgdg.list
+
+          apt-get update
+
+          # Repo folder you want (inside GitHub workspace)
+          OUT_DIR="$GITHUB_WORKSPACE/build-iso/extras/local-packages"
+          mkdir -p "$OUT_DIR"
+
+          # Download-only to OUT_DIR
+          apt-get -y --download-only \
+            -o Dir::Cache::archives="$OUT_DIR" \
+            install postgresql-12 postgresql-client-12 postgresql-contrib-12
+
+          ls -lh "$OUT_DIR"/*.deb || true
+
+      - name: Commit and push to repo
+        run: |
+          set -e
+          cd "$GITHUB_WORKSPACE"
+
+          # Nếu không có file mới thì thôi
+          if git status --porcelain | grep -q .; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            git add build-iso/extras/local-packages
+            git commit -m "Add PG12 deb packages (bookworm-pgdg)"
+            git push
+          else
+            echo "No changes to commit."
+          fi
