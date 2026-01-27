@@ -13,26 +13,37 @@ jobs:
     runs-on: ubuntu-24.04
 
     env:
-      # nơi đặt .deb để simple-cdd lấy
       LOCAL_DEB_DIR: build-iso/extras/local-packages
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install tools (curl, jq, simple-cdd)
+      - name: Install tools (curl, jq, simple-cdd + GPG keyrings)
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            curl jq grep sed ca-certificates \
+            ca-certificates curl jq grep sed \
+            gnupg gpgv debian-archive-keyring \
             simple-cdd python3-simple-cdd \
             debian-cd reprepro xorriso isolinux syslinux-common mtools \
             dctrl-tools dose-distcheck hfsutils lynx
 
-      # (CÁCH 1) Tải các file .deb từ release về thư mục local-packages
-      # Dùng "download url" của API assets -> không cần token (repo public)
+          # kiểm tra keyring đã có chưa
+          ls -la /usr/share/keyrings/ | head -n 50
+          test -f /usr/share/keyrings/debian-archive-keyring.gpg
+
+      - name: Prepare GNUPG home for runner (fix random_seed error)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.gnupg"
+          chmod 700 "$HOME/.gnupg"
+          # tạo file random_seed nếu cần (không bắt buộc nhưng giúp tránh lỗi)
+          touch "$HOME/.gnupg/random_seed" || true
+
       - name: Download .deb assets from GitHub Release (no token)
         shell: bash
         run: |
@@ -45,10 +56,8 @@ jobs:
           echo "Using release: ${OWNER_REPO} tag=${TAG}"
           mkdir -p "${LOCAL_DEB_DIR}"
 
-          # Lấy JSON release (public nên không cần token)
           release_json="$(curl -fsSL -H "Accept: application/vnd.github+json" "$API")"
 
-          # Lọc các asset .deb, lấy browser_download_url
           mapfile -t urls < <(
             echo "$release_json" \
               | jq -r '.assets[] | select(.name | endswith(".deb")) | .browser_download_url'
@@ -56,7 +65,6 @@ jobs:
 
           if [ "${#urls[@]}" -eq 0 ]; then
             echo "ERROR: No .deb assets found in release tag ${TAG}"
-            echo "Tip: kiểm tra release có asset .deb hay không."
             exit 1
           fi
 
@@ -69,11 +77,16 @@ jobs:
           echo "Downloaded files:"
           ls -lh "${LOCAL_DEB_DIR}"
 
-      # Build ISO: CHẠY simple-cdd BẰNG user runner (KHÔNG sudo) để tránh lỗi root
       - name: Build ISO with simple-cdd (non-root)
         shell: bash
+        env:
+          GNUPGHOME: ${{ github.workspace }}/.gnupg-ci
         run: |
           set -euo pipefail
+
+          # Dùng GNUPGHOME riêng trong workspace cho chắc quyền ghi
+          mkdir -p "$GNUPGHOME"
+          chmod 700 "$GNUPGHOME"
 
           CONF="$GITHUB_WORKSPACE/build-iso/simple-cdd.conf"
           test -f "$CONF" || (echo "Missing $CONF" && exit 1)
@@ -83,13 +96,12 @@ jobs:
 
           cd "$GITHUB_WORKSPACE/build-iso"
 
-          # build (không sudo)
           simple-cdd --conf ./simple-cdd.conf 2>&1 | tee "$GITHUB_WORKSPACE/build-simple-cdd.log"
 
           cd "$GITHUB_WORKSPACE"
           mkdir -p out
 
-          ISO_PATH="$(find "$GITHUB_WORKSPACE/build-iso" -maxdepth 5 -type f -name "*.iso" | head -n 1 || true)"
+          ISO_PATH="$(find "$GITHUB_WORKSPACE/build-iso" -maxdepth 6 -type f -name "*.iso" | head -n 1 || true)"
           if [ -z "$ISO_PATH" ]; then
             echo "ERROR: No ISO produced. Check build-simple-cdd.log"
             exit 1
