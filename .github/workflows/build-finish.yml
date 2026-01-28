@@ -40,10 +40,36 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          if ls -1 build-iso/extras/local-packages/*.deb >/dev/null 2>&1; then
-            f="$(ls -1 build-iso/extras/local-packages/*.deb | head -n 1)"
-            echo "Sample deb: $f"
-            head -n 1 "$f" || true
+          LP="build-iso/extras/local-packages"
+
+          if [ -d "$LP" ]; then
+            echo "Found $LP"
+            # in 20 file đầu (không dùng pipe head để tránh broken pipe)
+            i=0
+            for f in "$LP"/*.deb; do
+              [ -e "$f" ] || break
+              echo "$f"
+              i=$((i+1))
+              [ "$i" -ge 20 ] && break
+            done
+
+            # lấy 1 file đầu tiên theo glob (không pipe)
+            f=""
+            for x in "$LP"/*.deb; do
+              [ -e "$x" ] || break
+              f="$x"
+              break
+            done
+
+            if [ -n "$f" ]; then
+              echo "Sample deb: $f"
+              # đọc 1 dòng đầu để phát hiện LFS pointer (nếu là text)
+              head -n 1 "$f" || true
+            else
+              echo "No .deb files found in $LP"
+            fi
+          else
+            echo "No $LP directory"
           fi
 
       - name: Pack repo source (exclude .git)
