@@ -79,23 +79,25 @@ jobs:
 
           # Optional nhưng nếu bạn dùng auto-install thì nên có:
           test -f "iso/profiles/${PROFILE}.preseed" || echo "WARN: iso/profiles/${PROFILE}.preseed not found (auto-install may not work)"
-
-      - name: Build ISO with simple-cdd
+      - name: Create non-root build user
         shell: bash
-        working-directory: iso
         run: |
           set -euxo pipefail
-          mkdir -p ../artifacts/iso ../artifacts/logs
+          useradd -m -s /bin/bash builder
+          mkdir -p /work
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+      - name: Build ISO with simple-cdd (non-root)
+        shell: bash
+        run: |
+          set -euxo pipefail
+          su - builder -c "
+            set -euxo pipefail
+            cd '$GITHUB_WORKSPACE/iso'
+            mkdir -p ../artifacts/iso ../artifacts/logs
+            build-simple-cdd --dist '${DIST}' --profiles '${PROFILE}' \
+              --logfile '../artifacts/logs/build-simple-cdd.log' --verbose
+          "
 
-          # IMPORTANT:
-          # - ISO will typically be created under: iso/images/
-          # - Logs under: iso/tmp/log/
-          # Command options reference: build-simple-cdd(1) manpage. (Debian bookworm)
-          build-simple-cdd \
-            --dist "${DIST}" \
-            --profiles "${PROFILE}" \
-            --logfile "../artifacts/logs/build-simple-cdd.log" \
-            --verbose
 
       - name: Collect outputs
         shell: bash
