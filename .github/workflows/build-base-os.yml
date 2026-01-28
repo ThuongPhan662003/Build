@@ -94,7 +94,6 @@ jobs:
           # Command options reference: build-simple-cdd(1) manpage. (Debian bookworm)
           build-simple-cdd \
             --dist "${DIST}" \
-            --arch "${ARCH}" \
             --profiles "${PROFILE}" \
             --logfile "../artifacts/logs/build-simple-cdd.log" \
             --verbose
