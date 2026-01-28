@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "[postinst] Start base post-install config..."
+
+# Ensure sudo works for admin user
+if id -u admin >/dev/null 2>&1; then
+  usermod -aG sudo admin || true
+fi
+
+# Basic hardening for SSH (tuỳ chọn)
+SSHD="/etc/ssh/sshd_config"
+if [ -f "$SSHD" ]; then
+  sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin no/' "$SSHD" || true
+  sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' "$SSHD" || true
+  systemctl enable ssh || true
+  systemctl restart ssh || true
+fi
+
+# Timezone (đảm bảo đúng)
+timedatectl set-timezone Asia/Ho_Chi_Minh || true
+
+# Update packages index (tuỳ bạn; nếu offline thì có thể bỏ)
+apt-get update || true
+
+echo "[postinst] Done."

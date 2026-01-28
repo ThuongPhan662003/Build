@@ -1,0 +1,59 @@
+### Locale / Keyboard
+d-i debian-installer/locale string en_US.UTF-8
+d-i keyboard-configuration/xkb-keymap select us
+
+### Network (DHCP)
+d-i netcfg/choose_interface select auto
+d-i netcfg/get_hostname string debian12
+d-i netcfg/get_domain string local
+
+### Mirror
+d-i mirror/country string manual
+d-i mirror/http/hostname string deb.debian.org
+d-i mirror/http/directory string /debian
+d-i mirror/http/proxy string
+
+### Timezone
+d-i time/zone string Asia/Ho_Chi_Minh
+d-i clock-setup/utc boolean true
+d-i clock-setup/ntp boolean true
+
+### Users
+d-i passwd/root-login boolean false
+d-i passwd/make-user boolean true
+d-i passwd/user-fullname string Admin User
+d-i passwd/username string admin
+# Password dạng hash (SHA-512). Thay __CRYPTED_PASSWORD__ bằng hash thật.
+d-i passwd/user-password-crypted password __CRYPTED_PASSWORD__
+
+### Partitioning (DÙNG TOÀN BỘ DISK - tự động)
+d-i partman-auto/method string regular
+d-i partman-auto/choose_recipe select atomic
+d-i partman-partitioning/confirm_write_new_label boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+
+### Apt setup (Debian 12 có non-free-firmware; bạn có thể bật nếu cần)
+d-i apt-setup/contrib boolean true
+d-i apt-setup/non-free boolean true
+d-i apt-setup/non-free-firmware boolean true
+
+### Package selection
+tasksel tasksel/first multiselect standard, ssh-server
+popularity-contest popularity-contest/participate boolean false
+
+### Bootloader
+d-i grub-installer/only_debian boolean true
+d-i grub-installer/with_other_os boolean true
+
+### Run custom post-install script from simple-cdd profile
+# Script base.postinst sẽ được copy vào /target/root rồi chạy trong-target.
+d-i preseed/late_command string \
+  cp -f /cdrom/simple-cdd/profiles/base.postinst /target/root/base.postinst; \
+  chmod +x /target/root/base.postinst; \
+  in-target /root/base.postinst; \
+  rm -f /target/root/base.postinst
+
+### Finish
+d-i finish-install/reboot_in_progress note

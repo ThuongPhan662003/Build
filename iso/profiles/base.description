@@ -1,0 +1,4 @@
+Debian 12 (bookworm) - Base ISO
+- Auto install (preseed)
+- SSH + sudo + basic utilities
+- Timezone: Asia/Ho_Chi_Minh
