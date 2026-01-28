@@ -26,7 +26,7 @@ jobs:
       contents: write
 
     container:
-      image: debian:12
+      image: ubuntu:22.04
       options: --privileged
 
     # IMPORTANT: repo bạn dùng folder build-iso/, không phải iso/
