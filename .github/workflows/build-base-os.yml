@@ -1,6 +1,9 @@
 name: Build Debian 12 ISO (simple-cdd)
 
 on:
+  push:
+    tags:
+      - "iso-v*"
   workflow_dispatch:
     inputs:
       profile:
@@ -23,7 +26,8 @@ on:
 jobs:
   build-iso:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
     # Build inside Debian 12 to keep toolchain consistent
     container:
       image: debian:12
@@ -120,6 +124,26 @@ jobs:
           if [ -d iso/tmp/log ]; then
             cp -av iso/tmp/log artifacts/logs/simple-cdd-tmp-log || true
           fi
+      - name: Create GitHub Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/iso-v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          body: |
+            Debian 12 ISO built with simple-cdd.
+
+            Profile: ${{ env.PROFILE }}
+            Dist: ${{ env.DIST }}
+            Arch: ${{ env.ARCH }}
+
+            Checksums are in SHA256SUMS.txt.
+          files: |
+            artifacts/iso/*.iso
+            artifacts/iso/SHA256SUMS.txt
+            artifacts/logs/build-simple-cdd.log
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Optional QEMU smoke test (best-effort)
         if: ${{ inputs.run_qemu_smoketest == 'true' }}
