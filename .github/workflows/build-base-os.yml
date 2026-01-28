@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       profile:
-        description: "simple-cdd profile name (folder under iso/profiles/)"
+        description: "simple-cdd profile name"
         required: true
         default: "base"
       dist:
@@ -28,15 +28,17 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     # Build inside Debian 12 to keep toolchain consistent
     container:
       image: debian:12
       options: --privileged
 
+    # Fallback defaults so tag-triggered runs won't have empty inputs.*
     env:
-      PROFILE: ${{ inputs.profile }}
-      DIST: ${{ inputs.dist }}
-      ARCH: ${{ inputs.arch }}
+      PROFILE: ${{ inputs.profile || 'base' }}
+      DIST: ${{ inputs.dist || 'bookworm' }}
+      ARCH: ${{ inputs.arch || 'amd64' }}
 
     steps:
       - name: Checkout
@@ -61,35 +63,43 @@ jobs:
             dosfstools \
             mtools \
             zstd \
-            distro-info-data
+            distro-info-data \
+            qemu-system-x86 \
+            qemu-utils
           rm -rf /var/lib/apt/lists/*
-
 
       - name: Show tool versions
         shell: bash
         run: |
           set -eux
-          build-simple-cdd --help | head -n 50 || true
-          dpkg -l | egrep 'simple-cdd|debian-cd|xorriso' || true
+          echo "PROFILE=${PROFILE} DIST=${DIST} ARCH=${ARCH}"
+          build-simple-cdd --help | head -n 80 || true
+          dpkg -l | egrep 'simple-cdd|debian-cd|xorriso|distro-info-data' || true
 
       - name: Validate profile files exist
         shell: bash
         run: |
           set -euxo pipefail
+          echo "Using PROFILE=${PROFILE}"
           test -d "iso/profiles" || (echo "Missing iso/profiles" && ls -la iso && exit 1)
 
-          # simple-cdd profile thường là các file: <profile>.packages / .preseed / .postinst / .description
+          # Required
           test -f "iso/profiles/${PROFILE}.packages" || (echo "Missing iso/profiles/${PROFILE}.packages" && ls -la iso/profiles && exit 1)
 
-          # Optional nhưng nếu bạn dùng auto-install thì nên có:
+          # Optional but recommended for auto-install
           test -f "iso/profiles/${PROFILE}.preseed" || echo "WARN: iso/profiles/${PROFILE}.preseed not found (auto-install may not work)"
+
+          # Optional
+          test -f "iso/profiles/${PROFILE}.postinst" || echo "INFO: iso/profiles/${PROFILE}.postinst not found"
+          test -f "iso/profiles/${PROFILE}.description" || echo "INFO: iso/profiles/${PROFILE}.description not found"
+
       - name: Create non-root build user
         shell: bash
         run: |
           set -euxo pipefail
-          useradd -m -s /bin/bash builder
-          mkdir -p /work
+          id builder >/dev/null 2>&1 || useradd -m -s /bin/bash builder
           chown -R builder:builder "$GITHUB_WORKSPACE"
+
       - name: Build ISO with simple-cdd (non-root)
         shell: bash
         run: |
@@ -102,28 +112,33 @@ jobs:
               --logfile '../artifacts/logs/build-simple-cdd.log' --verbose
           "
 
-
       - name: Collect outputs
         shell: bash
         run: |
           set -euxo pipefail
+
+          mkdir -p artifacts/iso artifacts/logs
 
           # Collect ISO(s)
           if ls iso/images/*.iso >/dev/null 2>&1; then
             cp -av iso/images/*.iso artifacts/iso/
           else
             echo "No ISO found in iso/images/"
-            find iso -maxdepth 3 -type f -name "*.iso" -print
+            find iso -maxdepth 4 -type f -name "*.iso" -print || true
+            echo "Dump iso/ directory for debugging:"
+            find iso -maxdepth 3 -type d -print
             exit 1
           fi
 
           # Checksums
           (cd artifacts/iso && sha256sum *.iso > SHA256SUMS.txt)
 
-          # Collect logs if present
+          # Collect logs
+          test -f artifacts/logs/build-simple-cdd.log || echo "WARN: build-simple-cdd.log not found"
           if [ -d iso/tmp/log ]; then
             cp -av iso/tmp/log artifacts/logs/simple-cdd-tmp-log || true
           fi
+
       - name: Create GitHub Release (on tag)
         if: startsWith(github.ref, 'refs/tags/iso-v')
         uses: softprops/action-gh-release@v2
@@ -146,12 +161,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Optional QEMU smoke test (best-effort)
-        if: ${{ inputs.run_qemu_smoketest == 'true' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_qemu_smoketest == 'true' }}
         shell: bash
         run: |
           set -euxo pipefail
           ISO="$(ls -1 artifacts/iso/*.iso | head -n 1)"
-          # Boot ISO for a short time to ensure it starts (no full install here)
           qemu-system-x86_64 \
             -m 2048 \
             -cdrom "$ISO" \
@@ -166,14 +180,13 @@ jobs:
             -snapshot \
             -S &
 
-          # Let it run briefly then stop (best-effort)
           sleep 20
           pkill -f qemu-system-x86_64 || true
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: debian12-iso-${{ inputs.profile }}-${{ inputs.arch }}
+          name: debian12-iso-${{ env.PROFILE }}-${{ env.ARCH }}
           path: |
             artifacts/iso
             artifacts/logs
