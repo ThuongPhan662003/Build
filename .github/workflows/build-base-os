@@ -1,0 +1,150 @@
+name: Build Debian 12 ISO (simple-cdd)
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "simple-cdd profile name (folder under iso/profiles/)"
+        required: true
+        default: "base"
+      dist:
+        description: "Debian codename"
+        required: true
+        default: "bookworm"
+      arch:
+        description: "Target arch (amd64, arm64...)"
+        required: true
+        default: "amd64"
+      run_qemu_smoketest:
+        description: "Run qemu smoke test (best-effort)"
+        required: false
+        default: "false"
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+
+    # Build inside Debian 12 to keep toolchain consistent
+    container:
+      image: debian:12
+      options: --privileged
+
+    env:
+      PROFILE: ${{ inputs.profile }}
+      DIST: ${{ inputs.dist }}
+      ARCH: ${{ inputs.arch }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          set -euxo pipefail
+          apt-get update
+          # simple-cdd + tools used by debian-cd to generate ISO
+          apt-get install -y --no-install-recommends \
+            simple-cdd \
+            debian-cd \
+            xorriso \
+            isolinux \
+            syslinux-utils \
+            rsync \
+            wget \
+            ca-certificates \
+            apt-utils \
+            gnupg \
+            dosfstools \
+            mtools \
+            zstd \
+            qemu-system-x86 \
+            qemu-utils
+          rm -rf /var/lib/apt/lists/*
+
+      - name: Show tool versions
+        shell: bash
+        run: |
+          set -eux
+          build-simple-cdd --help | head -n 50 || true
+          dpkg -l | egrep 'simple-cdd|debian-cd|xorriso' || true
+
+      - name: Validate profile folder exists
+        shell: bash
+        run: |
+          set -euxo pipefail
+          test -d "iso/profiles/${PROFILE}" || (echo "Missing iso/profiles/${PROFILE}" && ls -la iso/profiles && exit 1)
+
+      - name: Build ISO with simple-cdd
+        shell: bash
+        working-directory: iso
+        run: |
+          set -euxo pipefail
+          mkdir -p ../artifacts/iso ../artifacts/logs
+
+          # IMPORTANT:
+          # - ISO will typically be created under: iso/images/
+          # - Logs under: iso/tmp/log/
+          # Command options reference: build-simple-cdd(1) manpage. (Debian bookworm)
+          build-simple-cdd \
+            --dist "${DIST}" \
+            --arch "${ARCH}" \
+            --profiles "${PROFILE}" \
+            --logfile "../artifacts/logs/build-simple-cdd.log" \
+            --verbose
+
+      - name: Collect outputs
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          # Collect ISO(s)
+          if ls iso/images/*.iso >/dev/null 2>&1; then
+            cp -av iso/images/*.iso artifacts/iso/
+          else
+            echo "No ISO found in iso/images/"
+            find iso -maxdepth 3 -type f -name "*.iso" -print
+            exit 1
+          fi
+
+          # Checksums
+          (cd artifacts/iso && sha256sum *.iso > SHA256SUMS.txt)
+
+          # Collect logs if present
+          if [ -d iso/tmp/log ]; then
+            cp -av iso/tmp/log artifacts/logs/simple-cdd-tmp-log || true
+          fi
+
+      - name: Optional QEMU smoke test (best-effort)
+        if: ${{ inputs.run_qemu_smoketest == 'true' }}
+        shell: bash
+        run: |
+          set -euxo pipefail
+          ISO="$(ls -1 artifacts/iso/*.iso | head -n 1)"
+          # Boot ISO for a short time to ensure it starts (no full install here)
+          qemu-system-x86_64 \
+            -m 2048 \
+            -cdrom "$ISO" \
+            -boot d \
+            -display none \
+            -serial stdio \
+            -no-reboot \
+            -device e1000 \
+            -netdev user,id=net0 \
+            -device e1000,netdev=net0 \
+            -accel tcg \
+            -snapshot \
+            -S &
+
+          # Let it run briefly then stop (best-effort)
+          sleep 20
+          pkill -f qemu-system-x86_64 || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: debian12-iso-${{ inputs.profile }}-${{ inputs.arch }}
+          path: |
+            artifacts/iso
+            artifacts/logs
+          if-no-files-found: error
