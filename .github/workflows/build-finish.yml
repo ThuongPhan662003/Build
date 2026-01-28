@@ -1,0 +1,206 @@
+name: Build Debian 12 ISO (simple-cdd)
+
+on:
+  push:
+    tags:
+      - "iso-v*"
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "simple-cdd profile name"
+        required: true
+        default: "webstack"
+      dist:
+        description: "Debian codename"
+        required: true
+        default: "bookworm"
+      run_qemu_smoketest:
+        description: "Run qemu smoke test (best-effort)"
+        required: false
+        default: "false"
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    container:
+      image: debian:12
+      options: --privileged
+
+    # IMPORTANT: repo bạn dùng folder build-iso/, không phải iso/
+    env:
+      WORKDIR: build-iso
+      PROFILE: ${{ inputs.profile || 'webstack' }}
+      DIST: ${{ inputs.dist || 'bookworm' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          set -euxo pipefail
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            simple-cdd \
+            debian-cd \
+            xorriso \
+            isolinux \
+            syslinux-utils \
+            rsync \
+            wget \
+            ca-certificates \
+            apt-utils \
+            gnupg \
+            dosfstools \
+            mtools \
+            zstd \
+            distro-info-data \
+            qemu-system-x86 \
+            qemu-utils
+          rm -rf /var/lib/apt/lists/*
+
+      - name: Show tool versions
+        shell: bash
+        run: |
+          set -eux
+          echo "WORKDIR=${WORKDIR} PROFILE=${PROFILE} DIST=${DIST}"
+          build-simple-cdd --help | head -n 80 || true
+          dpkg -l | egrep 'simple-cdd|debian-cd|xorriso|distro-info-data' || true
+
+      - name: Validate profile files exist
+        shell: bash
+        run: |
+          set -euxo pipefail
+          echo "Using WORKDIR=${WORKDIR} PROFILE=${PROFILE}"
+
+          test -d "${WORKDIR}/profiles" || (echo "Missing ${WORKDIR}/profiles" && ls -la "${WORKDIR}" && exit 1)
+
+          # Required
+          test -f "${WORKDIR}/profiles/${PROFILE}.packages" || (echo "Missing ${WORKDIR}/profiles/${PROFILE}.packages" && ls -la "${WORKDIR}/profiles" && exit 1)
+
+          # Optional but recommended for auto-install
+          test -f "${WORKDIR}/profiles/${PROFILE}.preseed" || echo "WARN: ${WORKDIR}/profiles/${PROFILE}.preseed not found (auto-install may not work)"
+
+          # Optional (không bắt buộc)
+          test -f "${WORKDIR}/profiles/${PROFILE}.postinst" || echo "INFO: ${WORKDIR}/profiles/${PROFILE}.postinst not found (ok)"
+          test -f "${WORKDIR}/profiles/${PROFILE}.description" || echo "INFO: ${WORKDIR}/profiles/${PROFILE}.description not found (ok)"
+
+          # If bạn có deb nội bộ
+          if [ -d "${WORKDIR}/extras/local-packages" ]; then
+            echo "Found local packages dir: ${WORKDIR}/extras/local-packages"
+            ls -la "${WORKDIR}/extras/local-packages" | head -n 50 || true
+          else
+            echo "INFO: No ${WORKDIR}/extras/local-packages (ok if you don't use local debs)"
+          fi
+
+      - name: Create non-root build user
+        shell: bash
+        run: |
+          set -euxo pipefail
+          id builder >/dev/null 2>&1 || useradd -m -s /bin/bash builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+
+      - name: Build ISO with simple-cdd (non-root)
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          # Nếu có local debs ở extras/local-packages, ta pass vào build-simple-cdd
+          LOCAL_PACKAGES_OPT=""
+          if [ -d "$GITHUB_WORKSPACE/${WORKDIR}/extras/local-packages" ]; then
+            LOCAL_PACKAGES_OPT="--local-packages extras/local-packages"
+          fi
+
+          su - builder -c "
+            set -euxo pipefail
+            cd '$GITHUB_WORKSPACE/${WORKDIR}'
+            mkdir -p ../artifacts/iso ../artifacts/logs
+
+            build-simple-cdd --dist '${DIST}' --profiles '${PROFILE}' \
+              ${LOCAL_PACKAGES_OPT} \
+              --logfile '../artifacts/logs/build-simple-cdd.log' --verbose
+          "
+
+      - name: Collect outputs
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p artifacts/iso artifacts/logs
+
+          # ISO output thường nằm ở <workdir>/images/
+          if ls "${WORKDIR}/images/"*.iso >/dev/null 2>&1; then
+            cp -av "${WORKDIR}/images/"*.iso artifacts/iso/
+          else
+            echo "No ISO found in ${WORKDIR}/images/"
+            find "${WORKDIR}" -maxdepth 4 -type f -name "*.iso" -print || true
+            echo "Dump ${WORKDIR}/ directory for debugging:"
+            find "${WORKDIR}" -maxdepth 3 -type d -print
+            exit 1
+          fi
+
+          (cd artifacts/iso && sha256sum *.iso > SHA256SUMS.txt)
+
+          # tmp/log thường nằm trong workdir
+          if [ -d "${WORKDIR}/tmp/log" ]; then
+            cp -av "${WORKDIR}/tmp/log" artifacts/logs/simple-cdd-tmp-log || true
+          fi
+
+          # build log
+          test -f artifacts/logs/build-simple-cdd.log || echo "WARN: build-simple-cdd.log not found"
+
+      - name: Create GitHub Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/iso-v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          body: |
+            Debian 12 ISO built with simple-cdd.
+
+            Workdir: ${{ env.WORKDIR }}
+            Profile: ${{ env.PROFILE }}
+            Dist: ${{ env.DIST }}
+
+            Checksums are in SHA256SUMS.txt.
+          files: |
+            artifacts/iso/*.iso
+            artifacts/iso/SHA256SUMS.txt
+            artifacts/logs/build-simple-cdd.log
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Optional QEMU smoke test (best-effort)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_qemu_smoketest == 'true' }}
+        shell: bash
+        run: |
+          set -euxo pipefail
+          ISO="$(ls -1 artifacts/iso/*.iso | head -n 1)"
+          qemu-system-x86_64 \
+            -m 2048 \
+            -cdrom "$ISO" \
+            -boot d \
+            -display none \
+            -serial stdio \
+            -no-reboot \
+            -device e1000 \
+            -netdev user,id=net0 \
+            -device e1000,netdev=net0 \
+            -accel tcg \
+            -snapshot \
+            -S &
+
+          sleep 20
+          pkill -f qemu-system-x86_64 || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: debian12-iso-${{ env.PROFILE }}
+          path: |
+            artifacts/iso
+            artifacts/logs
+          if-no-files-found: error
